@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import type { Registration } from '@/lib/types';
 import { REGISTRATION_FEE } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { IndianRupee, PieChart } from 'lucide-react';
+import { IndianRupee } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
@@ -12,7 +12,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
-import { Pie, ResponsiveContainer } from "recharts"
+import { PieChart, Pie, ResponsiveContainer } from "recharts"
 
 
 interface FeeCollectionStatsProps {
@@ -49,6 +49,17 @@ export default function FeeCollectionStats({ registrations, className }: FeeColl
     };
   }, [registrations]);
 
+  const chartConfig = {
+    collected: {
+      label: "Collected",
+      color: "hsl(var(--chart-1))",
+    },
+    pending: {
+      label: "Pending",
+      color: "hsl(var(--muted))",
+    },
+  };
+
   return (
     <Card className={cn(className)}>
       <CardHeader>
@@ -63,22 +74,24 @@ export default function FeeCollectionStats({ registrations, className }: FeeColl
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
             <div className="sm:col-span-1 h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                         <ChartTooltip
-                            cursor={false}
-                            content={<ChartTooltipContent hideLabel />}
+                <ChartContainer config={chartConfig} className="min-h-[128px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                            <ChartTooltip
+                                cursor={false}
+                                content={<ChartTooltipContent hideLabel />}
+                                />
+                            <Pie
+                                data={feeStats.chartData}
+                                dataKey="value"
+                                nameKey="name"
+                                innerRadius={30}
+                                outerRadius={50}
+                                strokeWidth={2}
                             />
-                        <Pie
-                            data={feeStats.chartData}
-                            dataKey="value"
-                            nameKey="name"
-                            innerRadius={30}
-                            outerRadius={50}
-                            strokeWidth={2}
-                        />
-                    </PieChart>
-                </ResponsiveContainer>
+                        </PieChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
             </div>
             <div className="sm:col-span-2 space-y-4">
                 <div>
