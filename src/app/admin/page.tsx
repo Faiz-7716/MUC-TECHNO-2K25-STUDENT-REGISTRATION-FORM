@@ -4,18 +4,20 @@ import { useState } from 'react';
 import AdminDashboard from '@/components/admin/AdminDashboard';
 import LoginModal from '@/components/admin/LoginModal';
 
-export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+export type AccessLevel = 'admin' | 'viewer';
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
+export default function AdminPage() {
+  const [accessLevel, setAccessLevel] = useState<AccessLevel | null>(null);
+
+  const handleLoginSuccess = (level: AccessLevel) => {
+    setAccessLevel(level);
   };
 
   return (
     <>
       <div className="min-h-screen bg-background">
-        {isAuthenticated ? (
-          <AdminDashboard />
+        {accessLevel ? (
+          <AdminDashboard accessLevel={accessLevel} />
         ) : (
           <LoginModal onLoginSuccess={handleLoginSuccess} />
         )}

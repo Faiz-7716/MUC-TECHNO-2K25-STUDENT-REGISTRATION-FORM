@@ -41,12 +41,13 @@ interface RegistrationsTableProps {
   initialData: Registration[];
   onDelete: (id: string) => Promise<void>;
   onDeleteMultiple: (ids: string[]) => Promise<void>;
+  isViewer: boolean;
 }
 
 type SortKey = keyof Registration | '';
 type SortDirection = 'asc' | 'desc';
 
-export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple }: RegistrationsTableProps) {
+export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple, isViewer }: RegistrationsTableProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -219,7 +220,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
             </CardDescription>
         </div>
         <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
-          {selectedRowIds.length > 0 && (
+          {!isViewer && selectedRowIds.length > 0 && (
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" className="w-full sm:w-auto">
@@ -290,15 +291,17 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                 <TableHeader>
                     <TableRow>
                     <TableHead className="px-2" style={{width: '40px'}}>
-                        <Checkbox 
-                          checked={isAllSelected || (isSomeSelected && 'indeterminate')}
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Select all rows"
-                        />
+                        {!isViewer && (
+                          <Checkbox 
+                            checked={isAllSelected || (isSomeSelected && 'indeterminate')}
+                            onCheckedChange={handleSelectAll}
+                            aria-label="Select all rows"
+                          />
+                        )}
                     </TableHead>
                     {tableHeaders.map(header => (
                         <TableHead key={header.key || 'actions'} className="px-2 first:px-4">
-                           {header.hideSort ? (
+                           {header.hideSort || (isViewer && header.label === 'Actions') ? (
                              <span className="px-2">{header.label}</span>
                            ) : (
                             <Button variant="ghost" onClick={() => handleSort(header.key)} className="px-2">
@@ -317,11 +320,13 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                     filteredData.map(reg => (
                     <TableRow key={reg.id} className={isPending ? 'opacity-50' : ''} data-state={selectedRowIds.includes(reg.id) && "selected"}>
                         <TableCell className="px-2">
-                           <Checkbox
+                          {!isViewer && (
+                            <Checkbox
                                 checked={selectedRowIds.includes(reg.id)}
                                 onCheckedChange={() => handleRowSelect(reg.id)}
                                 aria-label={`Select row for ${reg.name}`}
                             />
+                          )}
                         </TableCell>
                         <TableCell className="font-medium px-4">{reg.name}</TableCell>
                         <TableCell className="px-2">{reg.rollNumber}</TableCell>
@@ -336,25 +341,27 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                         </TableCell>
                         <TableCell className="px-2">{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
                         <TableCell className="px-2">
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete the registration for <span className="font-semibold">{reg.name}</span>.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleDelete(reg.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                            {!isViewer && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete the registration for <span className="font-semibold">{reg.name}</span>.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(reg.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
                         </TableCell>
                     </TableRow>
                     ))

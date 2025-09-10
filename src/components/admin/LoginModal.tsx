@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import type { AccessLevel } from '@/app/admin/page';
 import {
   Dialog,
   DialogContent,
@@ -14,10 +15,11 @@ import { Button } from '@/components/ui/button';
 import { KeyRound } from 'lucide-react';
 
 interface LoginModalProps {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (accessLevel: AccessLevel) => void;
 }
 
 const ADMIN_PASSWORD = "muc-admin-25";
+const VIEWER_PASSWORD = "muc-viewer-25";
 
 export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
   const [password, setPassword] = useState('');
@@ -26,7 +28,10 @@ export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
   const handleLogin = () => {
     if (password === ADMIN_PASSWORD) {
       setError('');
-      onLoginSuccess();
+      onLoginSuccess('admin');
+    } else if (password === VIEWER_PASSWORD) {
+      setError('');
+      onLoginSuccess('viewer');
     } else {
       setError('Incorrect password. Please try again.');
     }
