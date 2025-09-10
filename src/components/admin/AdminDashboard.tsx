@@ -5,9 +5,10 @@ import StatCards from "@/components/admin/StatCards";
 import RegistrationsTable from "@/components/admin/RegistrationsTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import AddRegistration from "@/components/admin/AddRegistration";
+import LiveEventStats from "./LiveEventStats";
 
 export default function AdminDashboard() {
-  const { registrations, loading, error, addRegistration, deleteRegistration } = useRegistrations();
+  const { registrations, loading, error, addRegistration, deleteRegistration, deleteMultipleRegistrations } = useRegistrations();
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -31,9 +32,11 @@ export default function AdminDashboard() {
         {!loading && !error && registrations && (
           <>
             <StatCards registrations={registrations} />
+            <LiveEventStats registrations={registrations} />
             <RegistrationsTable 
               initialData={registrations}
               onDelete={deleteRegistration}
+              onDeleteMultiple={deleteMultipleRegistrations}
             />
           </>
         )}

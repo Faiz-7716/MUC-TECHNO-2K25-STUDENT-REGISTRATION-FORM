@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, ChangeEvent, useTransition } from 'react';
+import { useState, useMemo, ChangeEvent, useTransition, useEffect } from 'react';
 import type { Registration, Department, Year, EventName } from '@/lib/types';
 import { departments, years, events } from '@/lib/types';
 import {
@@ -32,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowUpDown, FileDown, Search, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -39,12 +40,13 @@ import { useToast } from '@/hooks/use-toast';
 interface RegistrationsTableProps {
   initialData: Registration[];
   onDelete: (id: string) => Promise<void>;
+  onDeleteMultiple: (ids: string[]) => Promise<void>;
 }
 
 type SortKey = keyof Registration | '';
 type SortDirection = 'asc' | 'desc';
 
-export default function RegistrationsTable({ initialData, onDelete }: RegistrationsTableProps) {
+export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple }: RegistrationsTableProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -57,6 +59,7 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
     key: 'createdAt',
     direction: 'desc',
   });
+  const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
 
   const handleSort = (key: SortKey) => {
     const direction = sorting.key === key && sorting.direction === 'asc' ? 'desc' : 'asc';
@@ -97,6 +100,10 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
     });
   }, [initialData, searchTerm, filters, sorting]);
   
+  useEffect(() => {
+    setSelectedRowIds([]);
+  }, [searchTerm, filters]);
+
   const handleFilterChange = (filterType: 'department' | 'year' | 'event', value: string) => {
     startTransition(() => {
       setFilters(prev => ({ ...prev, [filterType]: value }));
@@ -125,6 +132,37 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
       });
     }
   }
+
+  const handleBulkDelete = async () => {
+    try {
+      await onDeleteMultiple(selectedRowIds);
+      toast({
+        title: "Bulk Delete Successful",
+        description: `${selectedRowIds.length} registrations have been deleted.`,
+      });
+      setSelectedRowIds([]);
+    } catch (error) {
+      toast({
+        title: "Bulk Delete Failed",
+        description: "An error occurred while deleting the registrations.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if(checked === true) {
+      setSelectedRowIds(filteredData.map(row => row.id));
+    } else {
+      setSelectedRowIds([]);
+    }
+  };
+
+  const handleRowSelect = (id: string) => {
+    setSelectedRowIds(prev =>
+      prev.includes(id) ? prev.filter(rowId => rowId !== id) : [...prev, id]
+    );
+  };
   
   const downloadCSV = () => {
     const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Registered At'];
@@ -168,19 +206,48 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
     { key: '', label: 'Actions', hideSort: true },
   ];
 
+  const isAllSelected = selectedRowIds.length > 0 && selectedRowIds.length === filteredData.length;
+  const isSomeSelected = selectedRowIds.length > 0 && selectedRowIds.length < filteredData.length;
+
   return (
     <Card>
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div>
             <CardTitle>Master Registrations</CardTitle>
             <CardDescription>
-                {filteredData.length} of {initialData.length} registrations showing.
+                {filteredData.length} of {initialData.length} registrations showing. {selectedRowIds.length > 0 && `(${selectedRowIds.length} selected)`}
             </CardDescription>
         </div>
-        <Button onClick={downloadCSV} variant="outline" className="shrink-0 w-full sm:w-auto">
-          <FileDown />
-          Export as CSV
-        </Button>
+        <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
+          {selectedRowIds.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full sm:w-auto">
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete ({selectedRowIds.length})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the selected {selectedRowIds.length} registrations.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBulkDelete} className="bg-destructive hover:bg-destructive/90">
+                    Yes, delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          <Button onClick={downloadCSV} variant="outline" className="shrink-0 w-full sm:w-auto">
+            <FileDown />
+            Export as CSV
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
@@ -222,6 +289,13 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
             <Table>
                 <TableHeader>
                     <TableRow>
+                    <TableHead className="px-2" style={{width: '40px'}}>
+                        <Checkbox 
+                          checked={isAllSelected || (isSomeSelected && 'indeterminate')}
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all rows"
+                        />
+                    </TableHead>
                     {tableHeaders.map(header => (
                         <TableHead key={header.key || 'actions'} className="px-2 first:px-4">
                            {header.hideSort ? (
@@ -241,7 +315,14 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
                 <TableBody>
                 {(isPending || filteredData.length > 0) ? (
                     filteredData.map(reg => (
-                    <TableRow key={reg.id} className={isPending ? 'opacity-50' : ''}>
+                    <TableRow key={reg.id} className={isPending ? 'opacity-50' : ''} data-state={selectedRowIds.includes(reg.id) && "selected"}>
+                        <TableCell className="px-2">
+                           <Checkbox
+                                checked={selectedRowIds.includes(reg.id)}
+                                onCheckedChange={() => handleRowSelect(reg.id)}
+                                aria-label={`Select row for ${reg.name}`}
+                            />
+                        </TableCell>
                         <TableCell className="font-medium px-4">{reg.name}</TableCell>
                         <TableCell className="px-2">{reg.rollNumber}</TableCell>
                         <TableCell className="px-2">{reg.department}</TableCell>
@@ -279,7 +360,7 @@ export default function RegistrationsTable({ initialData, onDelete }: Registrati
                     ))
                 ) : (
                     <TableRow>
-                    <TableCell colSpan={tableHeaders.length} className="h-24 text-center">
+                    <TableCell colSpan={tableHeaders.length + 1} className="h-24 text-center">
                         No results found.
                     </TableCell>
                     </TableRow>
