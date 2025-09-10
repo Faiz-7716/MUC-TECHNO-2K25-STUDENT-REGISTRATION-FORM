@@ -4,58 +4,58 @@
 
 @layer base {
   :root {
-    /* MUC TECHNO-2K25 Dark Theme - Blue Accents */
-    --background: 215 17% 16%; /* #232931 */
-    --foreground: 210 40% 98%;
-    --card: 215 17% 20%;
-    --card-foreground: 210 40% 98%;
-    --popover: 215 17% 18%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 216 83% 62%; /* #4E94ED */
+    /* MUC TECHNO-2K25 Light Theme - Teal Accents */
+    --background: 220 20% 97%; /* #f5f7fa */
+    --foreground: 224 18% 15%; /* #22282d */
+    --card: 0 0% 100%;
+    --card-foreground: 224 18% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 18% 15%;
+    --primary: 195 85% 41%; /* #11a0c4 */
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 32%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 32%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 206 87% 73%; /* #7CC4F7 */
-    --accent-foreground: 215 17% 16%;
-    --destructive: 0 72% 51%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 28%;
-    --input: 217 33% 28%;
-    --ring: 216 83% 62%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 195 85% 41%;
     --radius: 0.5rem;
-    --chart-1: 216 83% 62%;
-    --chart-2: 206 87% 73%;
-    --chart-3: 197 37% 54%;
+    --chart-1: 195 85% 41%;
+    --chart-2: 175 70% 40%;
+    --chart-3: 215 70% 60%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
 
   .dark {
-    /* MUC TECHNO-2K25 Dark Theme - Blue Accents */
-    --background: 215 17% 16%; /* #232931 */
-    --foreground: 210 40% 98%;
-    --card: 215 17% 20%;
-    --card-foreground: 210 40% 98%;
-    --popover: 215 17% 18%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 216 83% 62%; /* #4E94ED */
+    /* MUC TECHNO-2K25 Light Theme - Teal Accents */
+    --background: 220 20% 97%; /* #f5f7fa */
+    --foreground: 224 18% 15%; /* #22282d */
+    --card: 0 0% 100%;
+    --card-foreground: 224 18% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 18% 15%;
+    --primary: 195 85% 41%; /* #11a0c4 */
     --primary-foreground: 210 40% 98%;
-    --secondary: 217 33% 32%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 32%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 206 87% 73%; /* #7CC4F7 */
-    --accent-foreground: 215 17% 16%;
-    --destructive: 0 63% 31%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 28%;
-    --input: 217 33% 28%;
-    --ring: 216 83% 62%;
-    --chart-1: 216 83% 62%;
-    --chart-2: 206 87% 73%;
-    --chart-3: 197 37% 54%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 195 85% 41%;
+    --chart-1: 195 85% 41%;
+    --chart-2: 175 70% 40%;
+    --chart-3: 215 70% 60%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
