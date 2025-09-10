@@ -6,7 +6,7 @@ export default function Header() {
     <header className="text-center space-y-4 py-8">
       <div className="flex justify-center items-center gap-4 md:gap-8">
         <Image 
-          src="/docs/logo.png" 
+          src="https://fire-studio.screenplay-dev.google.com/studio-7270436993-95279/uploads/default/user/logo.png_1737873837.png" 
           alt="MUC TECHNO-2K25 Logo"
           width={100}
           height={100}
