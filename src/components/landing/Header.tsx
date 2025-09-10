@@ -6,7 +6,7 @@ export default function Header() {
     <header className="text-center space-y-4">
       <div className="flex justify-center">
         <Image 
-          src="https://fire-studio.screenplay-dev.google.com/static/copilot/5b89a319-72c6-48e0-a947-3a130f16bf51/logo.png" 
+          src="https://fire-studio.screenplay-dev.google.com/static/copilot/e922f25b-11c5-4a5e-99e2-d596644f8b9d/image.png" 
           alt="MUC TECHNO-2K25 Logo"
           width={400}
           height={400}
