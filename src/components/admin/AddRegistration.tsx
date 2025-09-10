@@ -36,7 +36,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Send } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "../ui/label";
 
 
 const formSchema = z.object({
@@ -212,7 +211,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select year" />
-                                            </Trigger>
+                                            </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
                                             {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
@@ -245,7 +244,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select event" />
-                                            </Trigger>
+                                            </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
                                             {events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
@@ -284,7 +283,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                 <div className="space-y-1 leading-none">
                                 <FormLabel>
                                     Register for a second event?
-                                </FormLabel>
+                                </Form-Label>
                                 </div>
                             </FormItem>
                             )}
