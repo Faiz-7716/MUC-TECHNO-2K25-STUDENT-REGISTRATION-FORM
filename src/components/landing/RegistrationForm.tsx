@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Send, Plus, Trash2 } from "lucide-react";
+import { Send, CheckCircle, PartyPopper } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
@@ -70,6 +70,7 @@ const formSchema = z.object({
 
 export default function RegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -123,17 +124,7 @@ export default function RegistrationForm() {
 
     try {
       await addDoc(collection(db, "registrations_2k25"), registrationData);
-
-      let description = `You have successfully registered for ${values.event1}.`;
-      if (registrationData.event2) {
-        description = `You have successfully registered for ${values.event1} and ${values.event2}.`;
-      }
-      
-      toast({
-        title: "Registration Successful!",
-        description: description,
-        variant: "default",
-      });
+      setIsSuccess(true);
       form.reset();
     } catch (error) {
       console.error("Error adding document: ", error);
@@ -145,6 +136,30 @@ export default function RegistrationForm() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  const handleRegisterAnother = () => {
+    setIsSuccess(false);
+  }
+
+  if (isSuccess) {
+    return (
+      <section id="register">
+        <Card className="w-full flex flex-col items-center justify-center text-center p-8 min-h-[500px]">
+          <div className="animate-in fade-in zoom-in-95 duration-500">
+            <CheckCircle className="h-24 w-24 text-green-500 mx-auto animate-pulse" />
+            <h2 className="font-headline text-4xl font-bold text-primary mt-6">Registration Successful!</h2>
+            <CardDescription className="mt-2 text-lg max-w-sm mx-auto">
+              Thank you for registering. We've received your details and look forward to seeing you at MUC TECHNO-2K25!
+            </CardDescription>
+            <Button onClick={handleRegisterAnother} className="mt-8">
+              <PartyPopper className="mr-2 h-4 w-4"/>
+              Register Another Participant
+            </Button>
+          </div>
+        </Card>
+      </section>
+    )
   }
 
   return (
