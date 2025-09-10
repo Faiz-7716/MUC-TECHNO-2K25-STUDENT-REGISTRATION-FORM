@@ -283,7 +283,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                 <div className="space-y-1 leading-none">
                                 <FormLabel>
                                     Register for a second event?
-                                </Form-Label>
+                                </FormLabel>
                                 </div>
                             </FormItem>
                             )}
