@@ -34,7 +34,7 @@ const processData = (registrations: Registration[], categories: readonly string[
     }
   });
 
-  return Object.entries(counts).map(([name, total]) => ({ name, total }));
+  return Object.entries(counts).map(([name, total]) => ({ name, total })).sort((a,b) => b.total - a.total);
 };
 
 const SimpleBarChart = ({ data, title }: { data: { name: string, total: number }[], title: string }) => (
@@ -42,18 +42,25 @@ const SimpleBarChart = ({ data, title }: { data: { name: string, total: number }
     <CardHeader>
       <CardTitle>{title}</CardTitle>
     </CardHeader>
-    <CardContent>
+    <CardContent className="pl-0">
       <ChartContainer config={{}} className="h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 0, right: 0, left: -10, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} tickLine={false} axisLine={false} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+          <BarChart data={data} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+            <XAxis type="number" hide />
+            <YAxis 
+                dataKey="name" 
+                type="category" 
+                tickLine={false} 
+                axisLine={false} 
+                tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} 
+                width={80}
+            />
             <Tooltip
                 cursor={{ fill: 'hsl(var(--card))' }}
                 content={<ChartTooltipContent indicator="dot" />}
             />
-            <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="total" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </ChartContainer>
@@ -84,12 +91,12 @@ export default function StatCards({ registrations }: StatCardsProps) {
           <Users className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{totalRegistrations}</div>
+          <div className="text-4xl font-bold">{totalRegistrations}</div>
           <p className="text-xs text-muted-foreground">{totalEventSlots} event slots filled</p>
         </CardContent>
       </Card>
       
-      <div className="lg:col-span-3 grid gap-4 md:grid-cols-3">
+      <div className="lg:col-span-3 grid gap-4 grid-cols-1 sm:grid-cols-3">
         <SimpleBarChart data={registrationsByEvent} title="By Event" />
         <SimpleBarChart data={registrationsByDept} title="By Department" />
         <SimpleBarChart data={registrationsByYear} title="By Year" />

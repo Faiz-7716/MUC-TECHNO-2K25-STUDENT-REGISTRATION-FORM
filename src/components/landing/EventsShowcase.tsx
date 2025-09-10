@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { BrainCircuit, Bug, Users, CodeXml, Palette, User, Clock, Group, Server, Presentation, Ban, Globe } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 
 const eventDetails = [
   {
@@ -42,30 +43,32 @@ const eventDetails = [
 
 export default function EventsShowcase() {
   return (
-    <section id="events" className="w-full">
-      <div className="text-center mb-8">
-        <h2 className="font-headline text-4xl font-bold text-primary">Events Showcase</h2>
-        <p className="text-muted-foreground mt-2">Explore the exciting challenges awaiting you.</p>
-      </div>
+    <Card className="w-full h-full">
+      <CardHeader>
+        <CardTitle className="font-headline text-3xl font-bold text-primary">Events Showcase</CardTitle>
+        <CardDescription>Explore the exciting challenges awaiting you.</CardDescription>
+      </CardHeader>
+      <CardContent>
       <Accordion type="single" collapsible className="w-full">
         {eventDetails.map((event, index) => (
           <AccordionItem value={`item-${index}`} key={index}>
-            <AccordionTrigger className="text-lg hover:no-underline">
+            <AccordionTrigger className="text-lg hover:no-underline font-medium">
               <div className="flex items-center gap-4">
-                <event.icon className="w-6 h-6 text-accent" />
-                <span className="font-medium">{event.title}</span>
+                <event.icon className="w-5 h-5 text-primary" />
+                <span>{event.title}</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="pl-14">
-              <div className="space-y-2 text-muted-foreground">
+            <AccordionContent className="pl-11">
+              <div className="space-y-3 text-muted-foreground">
                 <p>{event.description}</p>
-                {event.topics && <p className="text-sm"><span className="font-semibold text-foreground">Topics:</span> {event.topics}</p>}
-                {event.rules && <p className="text-sm text-accent/80"><span className="font-semibold text-accent">Rules:</span> {event.rules}</p>}
+                {event.topics && <p className="text-sm"><Globe className="inline-block mr-2 h-4 w-4" /> <span className="font-semibold text-foreground">Topics:</span> {event.topics}</p>}
+                {event.rules && <p className="text-sm text-destructive/80"><Ban className="inline-block mr-2 h-4 w-4" /> <span className="font-semibold text-destructive">Rules:</span> {event.rules}</p>}
               </div>
             </AccordionContent>
           </AccordionItem>
         ))}
       </Accordion>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
