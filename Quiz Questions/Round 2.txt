@@ -1,0 +1,198 @@
+
+# Computer Science Abbreviations Quiz - 30 Questions
+
+---
+
+## Section 1: Questions 1-10
+
+1. In software development, what does the acronym API stand for?
+A) Automated Program Interaction
+B) Application Programming Interface ✅
+C) Advanced Protocol Integration
+D) Application Process Interface
+
+2. What does GUI stand for?
+A) General User Interaction
+B) Graphical Utility Interface
+C) Global User Integration
+D) Graphical User Interface ✅
+
+3. In the TCP/IP networking model, what does TCP stand for?
+A) Transfer Control Protocol
+B) Terminal Control Protocol
+C) Transport Communication Protocol
+D) Transmission Control Protocol ✅
+
+4. In the context of data interchange, what does JSON stand for?
+A) Java Standard Object Notation
+B) JavaScript Object Notation ✅
+C) JavaScript Oriented Networking
+D) Java Source Object Navigation
+
+5. In web development, what does AJAX stand for?
+A) Advanced JavaScript and XML
+B) Asynchronous JavaScript and XML ✅
+C) Automated JavaScript Application Exchange
+D) Asynchronous Java and XML
+
+6. In cloud computing, what does SaaS stand for?
+A) System as a Service
+B) Secure Application and Software
+C) Software as a Service ✅
+D) Service and Software Agreement
+
+7. In the context of web security, what does OAuth stand for?
+A) Open Authorization ✅
+B) Open Authentication
+C) Official Authorization
+D) Outbound Authentication
+
+8. In networking and security, what does VPN stand for?
+A) Verified Private Network
+B) Virtual Protocol Network
+C) Virtual Public Network
+D) Virtual Private Network ✅
+
+9. What does the broader term URI stand for?
+A) Universal Resource Identifier
+B) Uniform Resource Interface
+C) Uniform Resource Identifier ✅
+D) Universal Record Identifier
+
+10. In technology, what does LSI stand for?
+
+A) Large Scale Integration ✅
+B) Low Speed Interface
+C) Logical System Input
+D) Local Service Interrupt
+
+---
+
+## Section 2: Questions 11-20
+
+11. In computer hardware, what does SSD stand for?
+A) Solid State Drive ✅
+B) Secure System Disk
+C) System Storage Device
+D) Single Storage Drive
+
+12. In networking, what does SSH stand for?
+A) Secure System Host
+B) Secure Shell ✅
+C) System Security Host
+D) Secure Socket Host
+
+13. What does PDF stand for?
+A) Portable Document Format ✅
+B) Printable Document File
+C) Personal Data File
+D) Published Document Format
+
+14. In project management, what does SDLC stand for?
+A) System Design Life Cycle
+B) Software Development Life Cycle ✅
+C) Software Design and Logic Control
+D) System Development and Logic Cycle
+
+15. In programming, what does IDE stand for?
+A) Interface Design Engine
+B) Integrated Design Environment
+C) Interactive Development Engine
+D) Integrated Development Environment ✅
+
+16. In the context of web services, what does REST stand for?
+A) Remote Execution State Transfer
+B) Representational State Transfer ✅
+C) Resource Exchange Standard Template
+D) Representational Standard Transaction
+
+17. What does XML stand for?
+A) Extended Machine Language
+B) Extensible Markup Language ✅
+C) Example Markup Language
+D) Executable Markup Logic
+
+18. In cloud computing, what does PaaS stand for?
+A) Programming as a Service
+B) Protocol as a Service
+C) Platform as a Service ✅
+D) Portal as a Service
+
+19. In machine learning, what does NLP stand for?
+A) Natural Language Processing ✅
+B) Network Logic Protocol
+C) Neural Learning Program
+D) Native Language Programming
+
+20. What does AMD stand for?
+
+A) Advanced Micro Devices ✅
+B) Automated Machine Design
+C) Applied Micro Development
+D) Advanced Media Device
+
+---
+
+## Section 3: Questions 21-30
+
+21. In web development and data transfer, what does FTP stand for?
+A) File Transfer Protocol ✅
+B) Fast Text Protocol
+C) File Transmission Process
+D) Folder Transfer Protocol
+
+22. What does ERP stand for in business software?
+
+A) Enterprise Resource Planning ✅
+B) Electronic Resource Program
+C) Enterprise Risk Prevention
+D) Electronic Reporting Process
+
+23. In the context of the Java programming language, what does JVM stand for?
+A) Java Verified Module
+B) Java Visual Machine
+C) JavaScript Virtual Machine
+D) Java Virtual Machine ✅
+
+24. In web development, what does DOM stand for?
+A) Data Object Model
+B) Document Orientation Model
+C) Dynamic Object Manipulation
+D) Document Object Model ✅
+
+25. What does the acronym CLI stand for?
+A) Command Line Interface ✅
+B) Common Language Infrastructure
+C) Complex Language Interpreter
+D) Command Language Input
+
+26. In web security, what does SSL stand for?
+A) Standard Security Layer
+B) System Socket Layer
+C) Secure Sockets Layer ✅
+D) Secure System Logic
+
+27. What does the image file format PNG stand for?
+A) Photo Network Graphics
+B) Printable Network Graphics
+C) Portable Network Graphics ✅
+D) Pixelated Network Graphics
+
+28. In the context of the Internet of Things, what does IoT stand for?
+A) Internet of Things ✅
+B) Internet of Technology
+C) Input/Output Technology
+D) Integrated Online Technology
+
+29. What does the acronym "CAD" stand for in the context of technology and design?
+
+A) Computerized Access Device
+B) Computer Aided Design ✅
+C) Centralized Application Development
+D) Controlled Automated Delivery
+
+30. In software engineering, what does ASCII stand for?
+A) American Standard Code for Information Interchange ✅
+B) Automated Standard Code for International Integration
+C) Advanced System for Character and Integer Interpretation
+D) American Standard Computer Interlink Index
