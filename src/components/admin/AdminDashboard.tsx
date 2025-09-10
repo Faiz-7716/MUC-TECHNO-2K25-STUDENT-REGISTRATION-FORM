@@ -6,6 +6,7 @@ import RegistrationsTable from "@/components/admin/RegistrationsTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import AddRegistration from "@/components/admin/AddRegistration";
 import LiveEventStats from "./LiveEventStats";
+import FeeCollectionStats from "./FeeCollectionStats";
 import type { AccessLevel } from "@/app/admin/page";
 
 interface AdminDashboardProps {
@@ -13,7 +14,15 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
-  const { registrations, loading, error, addRegistration, deleteRegistration, deleteMultipleRegistrations } = useRegistrations();
+  const { 
+    registrations, 
+    loading, 
+    error, 
+    addRegistration, 
+    deleteRegistration, 
+    deleteMultipleRegistrations,
+    updateFeeStatus
+  } = useRegistrations();
 
   const isViewer = accessLevel === 'viewer';
 
@@ -41,11 +50,15 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
         {!loading && !error && registrations && (
           <>
             <StatCards registrations={registrations} />
-            <LiveEventStats registrations={registrations} />
+            <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
+              <LiveEventStats registrations={registrations} className="lg:col-span-1" />
+              <FeeCollectionStats registrations={registrations} className="lg:col-span-2"/>
+            </div>
             <RegistrationsTable 
               initialData={registrations}
               onDelete={deleteRegistration}
               onDeleteMultiple={deleteMultipleRegistrations}
+              onUpdateFeeStatus={updateFeeStatus}
               isViewer={isViewer}
             />
           </>

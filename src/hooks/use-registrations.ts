@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, writeBatch, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Registration, RegistrationData } from '@/lib/types';
 
@@ -70,7 +70,17 @@ export default function useRegistrations() {
         throw new Error("Failed to delete registrations.");
     }
   }, []);
+  
+  const updateFeeStatus = useCallback(async (id: string, feePaid: boolean) => {
+    try {
+      const docRef = doc(db, "registrations_2k25", id);
+      await updateDoc(docRef, { feePaid });
+    } catch (e) {
+      console.error("Error updating fee status: ", e);
+      throw new Error("Failed to update fee status.");
+    }
+  }, []);
 
 
-  return { registrations, loading, error, addRegistration, deleteRegistration, deleteMultipleRegistrations };
+  return { registrations, loading, error, addRegistration, deleteRegistration, deleteMultipleRegistrations, updateFeeStatus };
 }

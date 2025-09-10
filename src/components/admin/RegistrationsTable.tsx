@@ -2,7 +2,7 @@
 
 import { useState, useMemo, ChangeEvent, useTransition, useEffect } from 'react';
 import type { Registration, Department, Year, EventName } from '@/lib/types';
-import { departments, years, events } from '@/lib/types';
+import { departments, years, events, REGISTRATION_FEE } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -36,18 +36,22 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowUpDown, FileDown, Search, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+
 
 interface RegistrationsTableProps {
   initialData: Registration[];
   onDelete: (id: string) => Promise<void>;
   onDeleteMultiple: (ids: string[]) => Promise<void>;
+  onUpdateFeeStatus: (id: string, feePaid: boolean) => Promise<void>;
   isViewer: boolean;
 }
 
 type SortKey = keyof Registration | '';
 type SortDirection = 'asc' | 'desc';
 
-export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple, isViewer }: RegistrationsTableProps) {
+export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple, onUpdateFeeStatus, isViewer }: RegistrationsTableProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -55,6 +59,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     department: 'all',
     year: 'all',
     event: 'all',
+    feePaid: 'all',
   });
   const [sorting, setSorting] = useState<{ key: SortKey; direction: SortDirection }>({
     key: 'createdAt',
@@ -81,6 +86,11 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
         if (sorting.key === 'createdAt' && aValue?.toDate && bValue?.toDate) {
              return sorting.direction === 'asc' ? aValue.toDate().getTime() - bValue.toDate().getTime() : bValue.toDate().getTime() - aValue.toDate().getTime();
         }
+        
+        if (typeof aValue === 'boolean' && typeof bValue === 'boolean') {
+          if (aValue === bValue) return 0;
+          return sorting.direction === 'asc' ? (aValue ? -1 : 1) : (aValue ? 1 : -1);
+        }
 
         if (String(aValue).toLowerCase() < String(bValue).toLowerCase()) return sorting.direction === 'asc' ? -1 : 1;
         if (String(aValue).toLowerCase() > String(bValue).toLowerCase()) return sorting.direction === 'asc' ? 1 : -1;
@@ -96,8 +106,9 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
       const departmentMatch = filters.department === 'all' || reg.department === filters.department;
       const yearMatch = filters.year === 'all' || reg.year === filters.year;
       const eventMatch = filters.event === 'all' || reg.event1 === filters.event || reg.event2 === filters.event;
+      const feePaidMatch = filters.feePaid === 'all' || String(reg.feePaid) === filters.feePaid;
 
-      return searchMatch && departmentMatch && yearMatch && eventMatch;
+      return searchMatch && departmentMatch && yearMatch && eventMatch && feePaidMatch;
     });
   }, [initialData, searchTerm, filters, sorting]);
   
@@ -105,7 +116,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     setSelectedRowIds([]);
   }, [searchTerm, filters]);
 
-  const handleFilterChange = (filterType: 'department' | 'year' | 'event', value: string) => {
+  const handleFilterChange = (filterType: 'department' | 'year' | 'event' | 'feePaid', value: string) => {
     startTransition(() => {
       setFilters(prev => ({ ...prev, [filterType]: value }));
     });
@@ -166,7 +177,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
   };
   
   const downloadCSV = () => {
-    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Registered At'];
+    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Fee Status', 'Fee Amount', 'Registered At'];
     const csvRows = [
       headers.join(','),
       ...filteredData.map(row => [
@@ -178,6 +189,8 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
         `"${row.event1}"`,
         `"${row.event2 || 'N/A'}"`,
         `"${row.teamMember2 || 'N/A'}"`,
+        `"${row.feePaid ? 'Paid' : 'Unpaid'}"`,
+        `"${row.feePaid ? REGISTRATION_FEE : 0}"`,
         `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"`
       ].join(','))
     ];
@@ -197,12 +210,29 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     });
   };
 
+  const handleFeeStatusChange = async (id: string, newStatus: boolean) => {
+    try {
+        await onUpdateFeeStatus(id, newStatus);
+        toast({
+            title: "Fee Status Updated",
+            description: "The payment status has been changed successfully.",
+        });
+    } catch (error) {
+        toast({
+            title: "Update Failed",
+            description: "Could not update the fee status. Please try again.",
+            variant: "destructive",
+        });
+    }
+  };
+
   const tableHeaders: { key: SortKey; label: string, hideSort?: boolean }[] = [
     { key: 'name', label: 'Name' },
     { key: 'rollNumber', label: 'Roll No' },
     { key: 'department', label: 'Department' },
     { key: 'year', label: 'Year' },
     { key: 'event1', label: 'Events' },
+    { key: 'feePaid', label: 'Fee Status' },
     { key: 'createdAt', label: 'Registered' },
     { key: '', label: 'Actions', hideSort: true },
   ];
@@ -261,7 +291,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
               className="pl-10"
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:flex-1">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:flex-1">
             <Select value={filters.department} onValueChange={(v) => handleFilterChange('department', v)}>
               <SelectTrigger><SelectValue placeholder="Department" /></SelectTrigger>
               <SelectContent>
@@ -281,6 +311,14 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
               <SelectContent>
                 <SelectItem value="all">All Events</SelectItem>
                 {events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+              </SelectContent>
+            </Select>
+             <Select value={filters.feePaid} onValueChange={(v) => handleFilterChange('feePaid', v)}>
+              <SelectTrigger><SelectValue placeholder="Fee Status" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="true">Paid</SelectItem>
+                <SelectItem value="false">Unpaid</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -338,6 +376,21 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                             {reg.event2 && <span className="text-muted-foreground">{reg.event2}</span>}
                           </div>
                           {reg.teamMember2 && <span className="text-xs text-muted-foreground mt-1">(with {reg.teamMember2})</span>}
+                        </TableCell>
+                        <TableCell className="px-2">
+                            <div className="flex items-center gap-2">
+                                {isViewer ? (
+                                    <Badge variant={reg.feePaid ? 'default' : 'destructive'} className="pointer-events-none">
+                                        {reg.feePaid ? 'Paid' : 'Unpaid'}
+                                    </Badge>
+                                ) : (
+                                    <Switch
+                                        checked={reg.feePaid}
+                                        onCheckedChange={(newStatus) => handleFeeStatusChange(reg.id, newStatus)}
+                                        aria-label="Fee payment status"
+                                    />
+                                )}
+                            </div>
                         </TableCell>
                         <TableCell className="px-2">{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
                         <TableCell className="px-2">

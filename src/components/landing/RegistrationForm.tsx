@@ -101,6 +101,7 @@ export default function RegistrationForm() {
         event2?: EventName;
         teamMember2?: string;
         createdAt: any;
+        feePaid: boolean;
     } = {
         name: values.name,
         rollNumber: values.rollNumber,
@@ -109,6 +110,7 @@ export default function RegistrationForm() {
         mobileNumber: values.mobileNumber,
         event1: values.event1,
         createdAt: serverTimestamp(),
+        feePaid: false,
     };
 
     if (values.addEvent2 && values.event2) {

@@ -36,6 +36,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Send } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "../ui/label";
 
 
 const formSchema = z.object({
@@ -48,6 +49,7 @@ const formSchema = z.object({
   addEvent2: z.boolean().default(false).optional(),
   event2: z.enum(events).optional(),
   teamMember2: z.string().optional(),
+  feePaid: z.boolean().default(false).optional(),
 }).refine(data => {
     if (data.addEvent2 && !data.event2) {
         return false;
@@ -84,6 +86,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
       mobileNumber: "",
       teamMember2: "",
       addEvent2: false,
+      feePaid: false,
     },
   });
 
@@ -102,6 +105,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
         year: values.year,
         mobileNumber: values.mobileNumber,
         event1: values.event1,
+        feePaid: values.feePaid || false,
     };
 
     if (values.addEvent2 && values.event2) {
@@ -208,7 +212,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select year" />
-                                            </SelectTrigger>
+                                            </Trigger>
                                         </FormControl>
                                         <SelectContent>
                                             {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
@@ -241,7 +245,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select event" />
-                                            </SelectTrigger>
+                                            </Trigger>
                                         </FormControl>
                                         <SelectContent>
                                             {events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
@@ -270,7 +274,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                             control={form.control}
                             name="addEvent2"
                             render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
                                 <FormControl>
                                 <Checkbox
                                     checked={field.value}
@@ -307,6 +311,25 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                                 )}
                             />
                         )}
+                        <FormField
+                            control={form.control}
+                            name="feePaid"
+                            render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+                                <FormControl>
+                                <Checkbox
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                />
+                                </FormControl>
+                                <div className="space-y-1 leading-none">
+                                <FormLabel>
+                                    Has the registration fee been paid?
+                                </FormLabel>
+                                </div>
+                            </FormItem>
+                            )}
+                        />
                     </div>
                      <DialogFooter>
                         <DialogClose asChild>

@@ -6,9 +6,11 @@ import { events } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 interface LiveEventStatsProps {
   registrations: Registration[];
+  className?: string;
 }
 
 interface EventStat {
@@ -16,7 +18,7 @@ interface EventStat {
     count: number;
 }
 
-export default function LiveEventStats({ registrations }: LiveEventStatsProps) {
+export default function LiveEventStats({ registrations, className }: LiveEventStatsProps) {
   const eventStats = useMemo(() => {
     const counts = events.reduce((acc, eventName) => {
       acc[eventName] = 0;
@@ -44,7 +46,7 @@ export default function LiveEventStats({ registrations }: LiveEventStatsProps) {
   }, [registrations]);
 
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <Flame className="text-primary"/>

@@ -5,6 +5,8 @@ export const years = ["1st Year", "2nd Year", "3rd Year"] as const;
 export const events = ["Tech Quiz", "Bug Blaster", "Panel Debate", "Web Wizards", "Design Duel"] as const;
 export const teamEvents = ["Panel Debate", "Web Wizards"];
 
+export const REGISTRATION_FEE = 50;
+
 export type Department = typeof departments[number];
 export type Year = typeof years[number];
 export type EventName = typeof events[number];
@@ -18,6 +20,7 @@ export interface RegistrationData {
   event1: EventName;
   event2?: EventName;
   teamMember2?: string;
+  feePaid: boolean;
 }
 
 export interface Registration extends RegistrationData {
