@@ -76,7 +76,7 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
         reg.rollNumber.toLowerCase().includes(searchTerm.toLowerCase());
       const departmentMatch = filters.department === 'all' || reg.department === filters.department;
       const yearMatch = filters.year === 'all' || reg.year === filters.year;
-      const eventMatch = filters.event === 'all' || reg.event === filters.event;
+      const eventMatch = filters.event === 'all' || reg.event1 === filters.event || reg.event2 === filters.event;
 
       return searchMatch && departmentMatch && yearMatch && eventMatch;
     });
@@ -87,7 +87,7 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
   };
   
   const downloadCSV = () => {
-    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event', 'Team Member 2', 'Registered At'];
+    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member 2', 'Registered At'];
     const csvRows = [
       headers.join(','),
       ...filteredData.map(row => [
@@ -96,7 +96,8 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
         `"${row.department}"`,
         `"${row.year}"`,
         `"${row.mobileNumber}"`,
-        `"${row.event}"`,
+        `"${row.event1}"`,
+        `"${row.event2 || ''}"`,
         `"${row.teamMember2 || ''}"`,
         `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm') : ''}"`
       ].join(','))
@@ -116,7 +117,7 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
     { key: 'rollNumber', label: 'Roll No' },
     { key: 'department', label: 'Department' },
     { key: 'year', label: 'Year' },
-    { key: 'event', label: 'Event' },
+    { key: 'event1', label: 'Events' },
     { key: 'createdAt', label: 'Registered' },
   ];
 
@@ -185,7 +186,11 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
                         <TableCell>{reg.rollNumber}</TableCell>
                         <TableCell>{reg.department}</TableCell>
                         <TableCell>{reg.year}</TableCell>
-                        <TableCell>{reg.event}{reg.teamMember2 && ` (+ ${reg.teamMember2})`}</TableCell>
+                        <TableCell>
+                          {reg.event1}
+                          {reg.event2 && `, ${reg.event2}`}
+                          {reg.teamMember2 && ` (+ ${reg.teamMember2})`}
+                        </TableCell>
                         <TableCell>{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
                     </TableRow>
                     ))

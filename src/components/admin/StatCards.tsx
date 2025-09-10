@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import type { Registration } from '@/lib/types';
+import type { Registration, EventName } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Users, ListChecks, School, CalendarDays } from 'lucide-react';
@@ -12,16 +12,25 @@ interface StatCardsProps {
   registrations: Registration[];
 }
 
-const processData = (registrations: Registration[], categories: readonly string[], key: keyof Registration) => {
+const processData = (registrations: Registration[], categories: readonly string[], key: keyof Registration | 'event') => {
   const counts = categories.reduce((acc, category) => {
     acc[category] = 0;
     return acc;
   }, {} as { [key: string]: number });
 
   registrations.forEach(reg => {
-    const categoryValue = reg[key] as string;
-    if (counts.hasOwnProperty(categoryValue)) {
-      counts[categoryValue]++;
+    if (key === 'event') {
+        if (reg.event1 && counts.hasOwnProperty(reg.event1)) {
+            counts[reg.event1]++;
+        }
+        if (reg.event2 && counts.hasOwnProperty(reg.event2)) {
+            counts[reg.event2]++;
+        }
+    } else {
+        const categoryValue = reg[key as keyof Registration] as string;
+        if (counts.hasOwnProperty(categoryValue)) {
+            counts[categoryValue]++;
+        }
     }
   });
 
@@ -54,6 +63,14 @@ const SimpleBarChart = ({ data, title }: { data: { name: string, total: number }
 
 export default function StatCards({ registrations }: StatCardsProps) {
   const totalRegistrations = registrations.length;
+  
+  const totalEventSlots = registrations.reduce((acc, reg) => {
+    let count = 0;
+    if (reg.event1) count++;
+    if (reg.event2) count++;
+    return acc + count;
+  }, 0);
+
 
   const registrationsByEvent = useMemo(() => processData(registrations, events, 'event'), [registrations]);
   const registrationsByDept = useMemo(() => processData(registrations, departments, 'department'), [registrations]);
@@ -68,7 +85,7 @@ export default function StatCards({ registrations }: StatCardsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalRegistrations}</div>
-          <p className="text-xs text-muted-foreground">Participants across all events</p>
+          <p className="text-xs text-muted-foreground">{totalEventSlots} event slots filled</p>
         </CardContent>
       </Card>
       

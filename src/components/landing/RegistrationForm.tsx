@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { departments, years, events, teamEvents } from "@/lib/types";
+import { departments, years, events, teamEvents, EventName } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +27,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Send } from "lucide-react";
+import { Send, Plus, Trash2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -35,10 +36,12 @@ const formSchema = z.object({
   department: z.enum(departments, { required_error: "Please select a department." }),
   year: z.enum(years, { required_error: "Please select your year." }),
   mobileNumber: z.string().regex(/^\d{10}$/, { message: "Please enter a valid 10-digit mobile number." }),
-  event: z.enum(events, { required_error: "Please select an event." }),
+  event1: z.enum(events, { required_error: "Please select an event." }),
+  addEvent2: z.boolean().default(false).optional(),
+  event2: z.enum(events).optional(),
   teamMember2: z.string().optional(),
 }).refine(data => {
-    if (teamEvents.includes(data.event) && !data.teamMember2) {
+    if (teamEvents.includes(data.event1) && !data.teamMember2) {
       // Optional, but you could enforce team member for team events
       return true; 
     }
@@ -46,6 +49,23 @@ const formSchema = z.object({
 }, {
     message: "Team member name is required for this event.",
     path: ["teamMember2"],
+}).refine(data => {
+    if (data.addEvent2 && !data.event2) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please select a second event.",
+    path: ["event2"],
+}).refine(data => {
+    if(data.addEvent2 && data.event1 === data.event2) {
+        return false;
+    }
+    return true;
+},
+{
+    message: "You cannot select the same event twice.",
+    path: ["event2"],
 });
 
 export default function RegistrationForm() {
@@ -59,23 +79,57 @@ export default function RegistrationForm() {
       rollNumber: "",
       mobileNumber: "",
       teamMember2: "",
+      addEvent2: false,
     },
   });
 
-  const selectedEvent = form.watch("event");
-  const showTeamMemberField = teamEvents.includes(selectedEvent);
+  const selectedEvent1 = form.watch("event1");
+  const addEvent2 = form.watch("addEvent2");
+
+  const showTeamMemberField = teamEvents.includes(selectedEvent1 as EventName);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    try {
-      await addDoc(collection(db, "registrations_2k25"), {
-        ...values,
-        createdAt: serverTimestamp(),
-      });
 
+    const registrationData: {
+        name: string;
+        rollNumber: string;
+        department: (typeof departments)[number];
+        year: (typeof years)[number];
+        mobileNumber: string;
+        event1: EventName;
+        event2?: EventName;
+        teamMember2?: string;
+        createdAt: any;
+    } = {
+        name: values.name,
+        rollNumber: values.rollNumber,
+        department: values.department,
+        year: values.year,
+        mobileNumber: values.mobileNumber,
+        event1: values.event1,
+        createdAt: serverTimestamp(),
+    };
+
+    if (values.addEvent2 && values.event2) {
+        registrationData.event2 = values.event2;
+    }
+
+    if (values.teamMember2) {
+        registrationData.teamMember2 = values.teamMember2;
+    }
+
+    try {
+      await addDoc(collection(db, "registrations_2k25"), registrationData);
+
+      let description = `You have successfully registered for ${values.event1}.`;
+      if (registrationData.event2) {
+        description = `You have successfully registered for ${values.event1} and ${values.event2}.`;
+      }
+      
       toast({
         title: "Registration Successful!",
-        description: `You have successfully registered for ${values.event}.`,
+        description: description,
         variant: "default",
       });
       form.reset();
@@ -96,7 +150,7 @@ export default function RegistrationForm() {
         <Card className="w-full">
             <CardHeader>
                 <CardTitle className="font-headline text-4xl font-bold text-primary">Register Now</CardTitle>
-                <CardDescription>Fill out the form below to participate in MUC TECHNO-2K25.</CardDescription>
+                <CardDescription>Fill out the form below to participate in MUC TECHNO-2K25. You can register for up to two events.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -183,10 +237,10 @@ export default function RegistrationForm() {
                             />
                             <FormField
                                 control={form.control}
-                                name="event"
+                                name="event1"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Event</FormLabel>
+                                        <FormLabel>Event 1</FormLabel>
                                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
                                                 <SelectTrigger>
@@ -212,6 +266,47 @@ export default function RegistrationForm() {
                                             <Input placeholder="Enter team member's name" {...field} />
                                         </FormControl>
                                         <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                             <FormField
+                                control={form.control}
+                                name="addEvent2"
+                                render={({ field }) => (
+                                <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 md:col-span-2">
+                                    <FormControl>
+                                    <Checkbox
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                    />
+                                    </FormControl>
+                                    <div className="space-y-1 leading-none">
+                                    <FormLabel>
+                                        Register for a second event?
+                                    </FormLabel>
+                                    </div>
+                                </FormItem>
+                                )}
+                            />
+                            {addEvent2 && (
+                                 <FormField
+                                    control={form.control}
+                                    name="event2"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Event 2</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Select a second event" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    {events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />

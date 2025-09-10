@@ -16,7 +16,8 @@ export type Registration = {
   department: Department;
   year: Year;
   mobileNumber: string;
-  event: EventName;
+  event1: EventName;
+  event2?: EventName;
   teamMember2?: string;
   createdAt: Timestamp;
 };
