@@ -19,7 +19,7 @@ interface LoginModalProps {
 }
 
 const ADMIN_PASSWORD = "muc-admin-25";
-const VIEWER_PASSWORD = "muc-viewer-25";
+const VIEWER_PASSWORD = "admin";
 
 export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
   const [password, setPassword] = useState('');
