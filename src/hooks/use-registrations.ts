@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import type { Registration } from '@/lib/types';
+import type { Registration, RegistrationData } from '@/lib/types';
 
 export default function useRegistrations() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -11,6 +11,7 @@ export default function useRegistrations() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
     const q = query(collection(db, 'registrations_2k25'), orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(
@@ -33,6 +34,28 @@ export default function useRegistrations() {
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
+  
+  const addRegistration = useCallback(async (data: RegistrationData) => {
+    try {
+      await addDoc(collection(db, "registrations_2k25"), {
+        ...data,
+        createdAt: serverTimestamp(),
+      });
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      throw new Error("Failed to add registration.");
+    }
+  }, []);
 
-  return { registrations, loading, error };
+  const deleteRegistration = useCallback(async (id: string) => {
+    try {
+      await deleteDoc(doc(db, "registrations_2k25", id));
+    } catch (e) {
+      console.error("Error deleting document: ", e);
+      throw new Error("Failed to delete registration.");
+    }
+  }, []);
+
+
+  return { registrations, loading, error, addRegistration, deleteRegistration };
 }

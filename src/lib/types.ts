@@ -9,8 +9,7 @@ export type Department = typeof departments[number];
 export type Year = typeof years[number];
 export type EventName = typeof events[number];
 
-export type Registration = {
-  id: string;
+export interface RegistrationData {
   name: string;
   rollNumber: string;
   department: Department;
@@ -19,5 +18,9 @@ export type Registration = {
   event1: EventName;
   event2?: EventName;
   teamMember2?: string;
+}
+
+export interface Registration extends RegistrationData {
+  id: string;
   createdAt: Timestamp;
 };

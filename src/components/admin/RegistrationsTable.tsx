@@ -20,20 +20,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowUpDown, Download, Search, FileDown } from 'lucide-react';
+import { ArrowUpDown, FileDown, Search, Trash2, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 interface RegistrationsTableProps {
   initialData: Registration[];
+  onDelete: (id: string) => Promise<void>;
 }
 
 type SortKey = keyof Registration | '';
 type SortDirection = 'asc' | 'desc';
 
-export default function RegistrationsTable({ initialData }: RegistrationsTableProps) {
+export default function RegistrationsTable({ initialData, onDelete }: RegistrationsTableProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
+  const { toast } = useToast();
   const [filters, setFilters] = useState({
     department: 'all',
     year: 'all',
@@ -94,6 +108,23 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
       setSearchTerm(e.target.value);
     });
   };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await onDelete(id);
+      toast({
+        title: "Success",
+        description: "Registration deleted successfully.",
+        variant: "default",
+      });
+    } catch (error) {
+       toast({
+        title: "Error",
+        description: "Failed to delete registration.",
+        variant: "destructive",
+      });
+    }
+  }
   
   const downloadCSV = () => {
     const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Registered At'];
@@ -106,9 +137,9 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
         `"${row.year}"`,
         `"${row.mobileNumber}"`,
         `"${row.event1}"`,
-        `"${row.event2 || ''}"`,
-        `"${row.teamMember2 || ''}"`,
-        `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : ''}"`
+        `"${row.event2 || 'N/A'}"`,
+        `"${row.teamMember2 || 'N/A'}"`,
+        `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"`
       ].join(','))
     ];
     
@@ -116,34 +147,39 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `muc_techno_2k25_registrations_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `MUC_TECHNO_2K25_Registrations_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+     toast({
+      title: "Export Successful",
+      description: "The registration data has been exported to CSV.",
+    });
   };
 
-  const tableHeaders: { key: SortKey; label: string }[] = [
+  const tableHeaders: { key: SortKey; label: string, hideSort?: boolean }[] = [
     { key: 'name', label: 'Name' },
     { key: 'rollNumber', label: 'Roll No' },
     { key: 'department', label: 'Department' },
     { key: 'year', label: 'Year' },
     { key: 'event1', label: 'Events' },
     { key: 'createdAt', label: 'Registered' },
+    { key: '', label: 'Actions', hideSort: true },
   ];
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-4">
         <div>
             <CardTitle>Master Registrations</CardTitle>
             <CardDescription>
                 {filteredData.length} of {initialData.length} registrations showing.
             </CardDescription>
         </div>
-        <Button onClick={downloadCSV} variant="outline" className="shrink-0">
+        <Button onClick={downloadCSV} variant="outline" className="shrink-0 w-full sm:w-auto">
           <FileDown />
-          Export CSV
+          Export as CSV
         </Button>
       </CardHeader>
       <CardContent>
@@ -187,13 +223,17 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
                 <TableHeader>
                     <TableRow>
                     {tableHeaders.map(header => (
-                        <TableHead key={header.key} className="px-2 first:px-4">
+                        <TableHead key={header.key || 'actions'} className="px-2 first:px-4">
+                           {header.hideSort ? (
+                             <span className="px-2">{header.label}</span>
+                           ) : (
                             <Button variant="ghost" onClick={() => handleSort(header.key)} className="px-2">
                                 {header.label}
-                                {sorting.key === header.key && (
+                                {sorting.key === header.key ? (
                                     <ArrowUpDown className="ml-2 h-4 w-4" />
-                                )}
+                                ) : <div className="w-4 h-4 ml-2"/> }
                             </Button>
+                           )}
                         </TableHead>
                     ))}
                     </TableRow>
@@ -211,14 +251,35 @@ export default function RegistrationsTable({ initialData }: RegistrationsTablePr
                             <span>{reg.event1}</span>
                             {reg.event2 && <span className="text-muted-foreground">{reg.event2}</span>}
                           </div>
-                          {reg.teamMember2 && <span className="text-xs text-muted-foreground mt-1">(+ {reg.teamMember2})</span>}
+                          {reg.teamMember2 && <span className="text-xs text-muted-foreground mt-1">(with {reg.teamMember2})</span>}
                         </TableCell>
                         <TableCell className="px-2">{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
+                        <TableCell className="px-2">
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the registration for <span className="font-semibold">{reg.name}</span>.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(reg.id)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                        </TableCell>
                     </TableRow>
                     ))
                 ) : (
                     <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
+                    <TableCell colSpan={tableHeaders.length} className="h-24 text-center">
                         No results found.
                     </TableCell>
                     </TableRow>
