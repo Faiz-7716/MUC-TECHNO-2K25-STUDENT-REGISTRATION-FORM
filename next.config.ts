@@ -28,6 +28,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'fire-studio.screenplay-dev.google.com',
+        port: '',
+        pathname: '/**',
+      }
     ],
   },
 };

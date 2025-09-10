@@ -1,11 +1,18 @@
 import { Calendar } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   return (
     <header className="text-center space-y-4">
-      <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary">
-        MUC TECHNO-2K25
-      </h1>
+      <div className="flex justify-center">
+        <Image 
+          src="https://fire-studio.screenplay-dev.google.com/static/copilot/5b89a319-72c6-48e0-a947-3a130f16bf51/logo.png" 
+          alt="MUC TECHNO-2K25 Logo"
+          width={400}
+          height={400}
+          className="w-48 h-48 md:w-64 md:h-64"
+        />
+      </div>
       <p className="text-lg md:text-xl text-muted-foreground font-medium">
         Organized by the Department of Computer Science, Mazharul Uloom College (Autonomous), Ambur.
       </p>
