@@ -13,6 +13,7 @@ const eventDetails = [
     title: "Tech Quiz",
     description: "A quiz competition with individual prelims and two-person team finals.",
     venue: "Sir Syed Ahmed Convention Hall",
+    time: "10:15 AM - 11:15 AM",
     topics: "Topics: Basics of Computer, Logo name finding, acronyms, and cyber security",
   },
   {
@@ -37,6 +38,7 @@ const eventDetails = [
     title: "Web Wizards",
     description: "A web design competition for two-person teams. Participants have 45 minutes to build a website for the 'MUC TECHNO 2k25' event.",
     venue: "Allied Lab",
+    time: "11:15 AM - 12:00 PM",
     rules: "Key rules: No internet access allowed.",
   },
   {
@@ -44,6 +46,7 @@ const eventDetails = [
     title: "Design Duel",
     description: "An individual poster design competition. Participants have 30 minutes to create a promotional poster for the event.",
     venue: "Multimedia Room",
+    time: "11:15 AM - 11:45 AM",
     rules: "Note: The use of AI tools or pre-made templates is forbidden.",
   },
 ];
