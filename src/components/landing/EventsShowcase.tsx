@@ -4,7 +4,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BrainCircuit, Bug, Users, CodeXml, Palette, User, Clock, Group, Server, Presentation, Ban, Globe } from "lucide-react";
+import { BrainCircuit, Bug, Users, CodeXml, Palette, User, Clock, Group, Server, Presentation, Ban, Globe, MapPin } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 
 const eventDetails = [
@@ -12,18 +12,22 @@ const eventDetails = [
     icon: BrainCircuit,
     title: "Tech Quiz",
     description: "A quiz competition with individual prelims and two-person team finals.",
-    topics: "Topics: Basics of Computer, Problem Solving Techniques, Output Prediction, and Tech Facts.",
+    venue: "Sir Syed Ahmed Convention Hall",
+    topics: "Topics: Basics of Computer, Logo name finding, acronyms, and cyber security",
   },
   {
     icon: Bug,
     title: "Bug Blaster",
     description: "A coding challenge focused on debugging existing code, not writing new code.",
+    venue: "Allied Lab",
+    time: "10:15 AM - 11:15 AM",
     rules: "Key rules: No internet access or personal mobile phones/USB drives are allowed.",
   },
   {
     icon: Users,
     title: "Panel Debate",
     description: "A paper presentation event for teams of up to two. Each team gets 5 minutes to present followed by a 2-minute Q&A.",
+    venue: "Sir Syed Ahmed Convention Hall",
     topics: "Topics: Cyber Security, Machine Learning, AI in healthcare, Ethical Hacking, and Cloud Computing.",
     rules: "Note: AI-generated content is strictly prohibited.",
   },
@@ -31,12 +35,14 @@ const eventDetails = [
     icon: CodeXml,
     title: "Web Wizards",
     description: "A web design competition for two-person teams. Participants have 45 minutes to build a website for the 'MUC TECHNO 2k25' event.",
+    venue: "Allied Lab",
     rules: "Key rules: No internet access allowed.",
   },
   {
     icon: Palette,
     title: "Design Duel",
     description: "An individual poster design competition. Participants have 30 minutes to create a promotional poster for the event.",
+    venue: "Multimedia Room",
     rules: "Note: The use of AI tools or pre-made templates is forbidden.",
   },
 ];
@@ -61,6 +67,8 @@ export default function EventsShowcase() {
             <AccordionContent className="pl-11">
               <div className="space-y-3 text-muted-foreground">
                 <p>{event.description}</p>
+                 {event.venue && <p className="text-sm"><MapPin className="inline-block mr-2 h-4 w-4" /> <span className="font-semibold text-foreground">Venue:</span> {event.venue}</p>}
+                {event.time && <p className="text-sm"><Clock className="inline-block mr-2 h-4 w-4" /> <span className="font-semibold text-foreground">Time:</span> {event.time}</p>}
                 {event.topics && <p className="text-sm"><Globe className="inline-block mr-2 h-4 w-4" /> <span className="font-semibold text-foreground">Topics:</span> {event.topics}</p>}
                 {event.rules && <p className="text-sm text-destructive/80"><Ban className="inline-block mr-2 h-4 w-4" /> <span className="font-semibold text-destructive">Rules:</span> {event.rules}</p>}
               </div>
