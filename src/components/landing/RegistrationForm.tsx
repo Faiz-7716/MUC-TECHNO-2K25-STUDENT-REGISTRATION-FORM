@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { departments, years, events, teamEvents, EventName } from "@/lib/types";
+import { departments, years, events, teamEvents, EventName, eventTimes } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,9 +62,20 @@ const formSchema = z.object({
         return false;
     }
     return true;
-},
-{
+}, {
     message: "You cannot select the same event twice.",
+    path: ["event2"],
+}).refine(data => {
+    if (data.addEvent2 && data.event1 && data.event2) {
+        const time1 = eventTimes[data.event1];
+        const time2 = eventTimes[data.event2];
+        if (time1.startsWith('10:15') && time2.startsWith('10:15')) return false;
+        if (time1.startsWith('11:15') && time2.startsWith('11:15')) return false;
+        if (time1.startsWith('11:15') && time2.startsWith('11:15')) return false;
+    }
+    return true;
+}, {
+    message: "These two events are at the same time. Please choose events in different time slots.",
     path: ["event2"],
 });
 

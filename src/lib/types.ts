@@ -11,6 +11,14 @@ export type Department = typeof departments[number];
 export type Year = typeof years[number];
 export type EventName = typeof events[number];
 
+export const eventTimes: Record<EventName, string> = {
+    "Tech Quiz": "10:15-11:15",
+    "Bug Blaster": "10:15-11:15",
+    "Panel Debate": "11:15-12:15",
+    "Web Wizards": "11:15-12:00",
+    "Design Duel": "11:15-11:45"
+};
+
 export interface RegistrationData {
   name: string;
   rollNumber: string;
