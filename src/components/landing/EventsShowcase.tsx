@@ -28,6 +28,7 @@ const eventDetails = [
     title: "Panel Debate",
     description: "A paper presentation event for teams of up to two. Each team gets 5 minutes to present followed by a 2-minute Q&A.",
     venue: "Sir Syed Ahmed Convention Hall",
+    time: "11:15 AM - 12:15 PM",
     topics: "Topics: Cyber Security, Machine Learning, AI in healthcare, Ethical Hacking, and Cloud Computing.",
     rules: "Note: AI-generated content is strictly prohibited.",
   },
