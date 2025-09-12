@@ -239,6 +239,7 @@ export default function RegistrationFlow() {
                                 onChange={handleFileChange}
                                 className="file:text-foreground"
                             />
+                            <p className="text-xs text-muted-foreground">Please ensure the screenshot file is less than 1MB.</p>
                             {fileError && <p className="text-sm font-medium text-destructive flex items-center gap-2 mt-2"><FileWarning className="h-4 w-4" /> {fileError}</p>}
                         </div>
 
