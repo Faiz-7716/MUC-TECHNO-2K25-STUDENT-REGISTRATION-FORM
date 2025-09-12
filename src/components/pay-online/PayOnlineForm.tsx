@@ -33,7 +33,7 @@ const formSchema = z.object({
 type SubmissionStatus = 'idle' | 'verifying' | 'found' | 'not-found' | 'uploading' | 'saving' | 'success' | 'error';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 
 export default function PayOnlineForm() {
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
@@ -133,9 +133,6 @@ export default function PayOnlineForm() {
         
         const regDocRef = doc(db, "registrations_2k25", foundRegistration.id);
         await updateDoc(regDocRef, { 
-            // We set feePaid to false here, so admin can verify first.
-            // Or we can set it to true and let admin override. Let's keep it true for now.
-            feePaid: true,
             paymentScreenshotUrl: downloadURL
         });
         
@@ -170,7 +167,7 @@ export default function PayOnlineForm() {
                 {isAlreadyVerified ? 'Payment Already Verified' : 'Payment Submitted!'}
             </h2>
             <CardDescription className="mt-2 text-lg max-w-sm mx-auto">
-                {isAlreadyVerified ? `Thank you, ${foundRegistration.name}. Your payment for MUC TECHNO-2K25 has already been confirmed.` : 'Your payment proof has been submitted successfully. We will verify it shortly. See you at the event!'}
+                {isAlreadyVerified ? `Thank you, ${foundRegistration?.name}. Your payment for MUC TECHNO-2K25 has already been confirmed.` : 'Your payment proof has been submitted successfully. We will verify it shortly. See you at the event!'}
             </CardDescription>
             <Button onClick={handleReset} className="mt-8">
               <PartyPopper className="mr-2 h-4 w-4"/>
@@ -245,7 +242,7 @@ export default function PayOnlineForm() {
                                 <h3 className="font-headline text-xl font-bold flex items-center gap-2"><QrCode /> Step 1: Scan & Pay</h3>
                                 <p className="text-muted-foreground">Scan the QR code with any UPI app to pay the registration fee of <span className="font-bold text-foreground">₹{REGISTRATION_FEE}</span>.</p>
                                 <Image 
-                                    src="/docs/payment-qr.jpeg" 
+                                    src="/docs/payment-qr.jpg" 
                                     alt="Payment QR Code"
                                     width={250}
                                     height={250}
