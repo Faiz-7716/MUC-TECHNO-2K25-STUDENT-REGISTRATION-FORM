@@ -1,4 +1,3 @@
-
 import {
   Accordion,
   AccordionContent,
@@ -56,14 +55,14 @@ export default function EventsShowcase() {
   return (
     <Card className="w-full h-full">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl font-bold text-primary">Events Showcase</CardTitle>
+        <CardTitle className="font-headline text-2xl sm:text-3xl font-bold text-primary">Events Showcase</CardTitle>
         <CardDescription>Explore the exciting challenges awaiting you.</CardDescription>
       </CardHeader>
       <CardContent>
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
         {eventDetails.map((event, index) => (
           <AccordionItem value={`item-${index}`} key={index}>
-            <AccordionTrigger className="text-lg hover:no-underline font-medium">
+            <AccordionTrigger className="text-base sm:text-lg hover:no-underline font-medium text-left">
               <div className="flex items-center gap-4">
                 <event.icon className="w-5 h-5 text-primary" />
                 <span>{event.title}</span>

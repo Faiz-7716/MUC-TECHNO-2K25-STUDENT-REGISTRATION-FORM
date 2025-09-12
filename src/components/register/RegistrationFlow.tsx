@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -60,12 +59,6 @@ type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB for Firestore document limit
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 
-
-/**
- * Converts a File object to a Base64 string.
- * @param file The file to convert.
- * @returns A promise that resolves with the Base64 data URL.
- */
 const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -74,7 +67,6 @@ const fileToBase64 = (file: File): Promise<string> => {
         reader.onerror = error => reject(error);
     });
 };
-
 
 export default function RegistrationFlow() {
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
@@ -125,7 +117,6 @@ export default function RegistrationFlow() {
     }
   };
 
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!selectedFile) {
         toast({
@@ -142,7 +133,6 @@ export default function RegistrationFlow() {
     try {
         const rollNumberUpper = values.rollNumber.toUpperCase();
 
-        // Check for existing roll number before doing anything else
         const q = query(collection(db, "registrations_2k25"), where("rollNumber", "==", rollNumberUpper));
         const querySnapshot = await getDocs(q);
         if (!querySnapshot.empty) {
@@ -155,16 +145,13 @@ export default function RegistrationFlow() {
             return;
         }
         
-        // 1. Convert the file to Base64
         const base64String = await fileToBase64(selectedFile);
-        toast({ title: "Image Processed", description: "Your screenshot is ready for submission." });
-
-        // 2. Save everything to Firestore
+        
         const registrationData = {
             ...values,
             rollNumber: rollNumberUpper,
             paymentScreenshotBase64: base64String,
-            feePaid: false, // All online payments need verification
+            feePaid: false, 
             createdAt: serverTimestamp(),
         };
 
@@ -190,8 +177,8 @@ export default function RegistrationFlow() {
         <Card className="w-full flex flex-col items-center justify-center text-center p-8 min-h-[500px]">
           <div className="animate-in fade-in zoom-in-95 duration-500">
             <CheckCircle className="h-24 w-24 text-green-500 mx-auto animate-pulse" />
-            <h2 className="font-headline text-4xl font-bold text-primary mt-6">Registration Submitted!</h2>
-            <CardDescription className="mt-2 text-lg max-w-sm mx-auto">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold text-primary mt-6">Registration Submitted!</h2>
+            <CardDescription className="mt-2 text-base sm:text-lg max-w-sm mx-auto">
                 Thank you! Your registration and payment proof have been submitted for verification. We look forward to seeing you!
             </CardDescription>
             <Button onClick={handleReset} className="mt-8">
@@ -209,68 +196,59 @@ export default function RegistrationFlow() {
     <section id="register">
         <Card className="w-full">
             <CardHeader>
-                <CardTitle className="font-headline text-4xl font-bold text-primary">Register for MUC TECHNO-2K25</CardTitle>
+                <CardTitle className="font-headline text-3xl sm:text-4xl font-bold text-primary">Register for MUC TECHNO-2K25</CardTitle>
                 <CardDescription>Follow the steps below to complete your registration.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
                 
-                {/* STEP 1: PAYMENT & UPLOAD */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 border rounded-lg">
-                    <div className="space-y-4">
-                        <h3 className="font-headline text-xl font-bold flex items-center gap-2"><QrCode /> Step 1: Scan & Pay</h3>
-                        <p className="text-muted-foreground">Scan the QR code with any UPI app to pay the registration fee of <span className="font-bold text-foreground">₹{REGISTRATION_FEE}</span>.</p>
-                        <Image 
-                            src="/docs/payment-qr.jpg" 
-                            alt="Payment QR Code"
-                            width={250}
-                            height={250}
-                            className="rounded-lg border-4 border-primary shadow-lg mx-auto"
-                        />
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="font-headline text-xl font-bold flex items-center gap-2"><FileUp /> Step 2: Select Screenshot</h3>
-                         <p className="text-muted-foreground">After payment, take a screenshot and select it here. You will submit everything together at the end.</p>
-                        
-                        <div className="space-y-2">
-                             <Input 
-                                type="file" 
-                                accept={ALLOWED_FILE_TYPES.join(',')}
-                                disabled={isSubmitting}
-                                onChange={handleFileChange}
-                                className="file:text-foreground"
+                <div className="p-4 sm:p-6 border rounded-lg space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <h3 className="font-headline text-xl font-bold flex items-center gap-2"><QrCode /> Step 1: Scan & Pay</h3>
+                            <p className="text-muted-foreground text-sm sm:text-base">Scan the QR code with any UPI app to pay the registration fee of <span className="font-bold text-foreground">₹{REGISTRATION_FEE}</span>.</p>
+                            <Image 
+                                src="/docs/payment-qr.jpg" 
+                                alt="Payment QR Code"
+                                width={250}
+                                height={250}
+                                className="rounded-lg border-4 border-primary shadow-lg mx-auto w-48 h-48 sm:w-64 sm:h-64 object-cover"
                             />
-                            <p className="text-xs text-muted-foreground">Please ensure the screenshot file is less than 1MB.</p>
-                            {fileError && <p className="text-sm font-medium text-destructive flex items-center gap-2 mt-2"><FileWarning className="h-4 w-4" /> {fileError}</p>}
                         </div>
-
-                         {isSubmitting && (
-                            <div className="space-y-2 pt-2 text-center">
-                                <Loader2 className="h-6 w-6 text-primary animate-spin mx-auto"/>
-                                <p className="text-sm font-semibold text-primary animate-pulse">
-                                    Submitting registration...
-                                </p>
+                        <div className="space-y-4">
+                            <h3 className="font-headline text-xl font-bold flex items-center gap-2"><FileUp /> Step 2: Select Screenshot</h3>
+                             <p className="text-muted-foreground text-sm sm:text-base">After payment, take a screenshot and select it here. You will submit everything together at the end.</p>
+                            
+                            <div className="space-y-2">
+                                 <Input 
+                                    type="file" 
+                                    accept={ALLOWED_FILE_TYPES.join(',')}
+                                    disabled={isSubmitting}
+                                    onChange={handleFileChange}
+                                    className="file:text-foreground h-auto p-2"
+                                />
+                                <p className="text-xs text-muted-foreground">Please ensure the screenshot file is less than 1MB.</p>
+                                {fileError && <p className="text-sm font-medium text-destructive flex items-center gap-2 mt-2"><FileWarning className="h-4 w-4" /> {fileError}</p>}
                             </div>
-                        )}
-                        
-                        {selectedFile && !isSubmitting && (
-                            <div className="flex items-center gap-3 p-3 rounded-md bg-green-50 border border-green-200 text-green-700">
-                                <CheckCircle className="h-6 w-6" />
-                                <div className="flex flex-col">
-                                    <span className="font-bold truncate max-w-xs">Selected: {selectedFile.name}</span>
-                                    <span className="text-sm">Ready to be submitted with your form.</span>
+                            
+                            {selectedFile && !isSubmitting && (
+                                <div className="flex items-center gap-3 p-3 rounded-md bg-green-50 border border-green-200 text-green-700">
+                                    <CheckCircle className="h-6 w-6" />
+                                    <div className="flex flex-col">
+                                        <span className="font-bold truncate max-w-xs text-sm sm:text-base">Selected: {selectedFile.name}</span>
+                                        <span className="text-sm">Ready to be submitted with your form.</span>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* STEP 3: REGISTRATION FORM */}
                 <div>
                      <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Fill Details & Submit</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <fieldset disabled={isSubmitting || !selectedFile} className={`space-y-6 transition-opacity duration-500 ${isSubmitting || !selectedFile ? 'opacity-50 pointer-events-none' : ''}`}>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <fieldset disabled={isSubmitting || !selectedFile} className={`space-y-6 transition-opacity duration-300 ${!selectedFile ? 'opacity-50 pointer-events-none' : ''}`}>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     <FormField name="name" control={form.control} render={({ field }) => (
                                         <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
@@ -305,9 +283,18 @@ export default function RegistrationFlow() {
                                 </div>
                             </fieldset>
                             
-                            <Button type="submit" disabled={isSubmitting || !selectedFile} className="w-full md:w-auto">
-                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                                {isSubmitting ? "Submitting..." : "Submit Registration"}
+                             <Button type="submit" disabled={isSubmitting || !selectedFile} className="w-full sm:w-auto">
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Submitting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="mr-2 h-4 w-4" />
+                                        Submit Registration
+                                    </>
+                                )}
                             </Button>
                         </form>
                     </Form>

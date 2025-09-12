@@ -40,27 +40,29 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
     <div className="p-4 sm:p-6 lg:p-8">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
         <div>
-          <h1 className="font-headline text-4xl font-bold text-primary">Admin Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="font-headline text-3xl sm:text-4xl font-bold text-primary">Admin Dashboard</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             MUC TECHNO-2K25 Live Registrations {isViewer && <span className="font-semibold text-primary">(Read-Only Mode)</span>}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
             {!isViewer && <AddRegistration onAdd={addRegistration} />}
              <Button 
               variant={viewMode === 'table' ? 'default' : 'outline'} 
               onClick={() => setViewMode('table')}
               title="View Registrations Table"
+              size="icon"
              >
-                <List />
+                <List className="h-5 w-5"/>
              </Button>
              <Button 
                 variant={viewMode === 'payments' ? 'default' : 'outline'} 
                 onClick={() => setViewMode('payments')}
                 className="relative"
                 title="View Payments Manager"
+                size="icon"
              >
-                <GalleryVerticalEnd />
+                <GalleryVerticalEnd className="h-5 w-5" />
                 {paymentsToReview.length > 0 && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs text-white">
                     {paymentsToReview.length}

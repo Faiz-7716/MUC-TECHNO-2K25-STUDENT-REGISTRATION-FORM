@@ -193,7 +193,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
         `"${row.feePaid ? 'Paid' : 'Unpaid'}"`,
         `"${row.feePaid ? REGISTRATION_FEE : 0}"`,
         `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"`,
-        `"${row.paymentScreenshotBase64 ? 'true' : 'false'}"` // Indicate if Base64 is present
+        `"${row.paymentScreenshotBase64 ? 'true' : 'false'}"`
       ].join(','))
     ];
     
@@ -248,7 +248,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
         <div>
             <CardTitle>Master Registrations</CardTitle>
             <CardDescription>
-                {filteredData.length} of {initialData.length} registrations showing. {selectedRowIds.length > 0 && `(${selectedRowIds.length} selected)`}
+                {filteredData.length} of {initialData.length} showing. {selectedRowIds.length > 0 && `(${selectedRowIds.length} selected)`}
             </CardDescription>
         </div>
         <div className="flex flex-col-reverse sm:flex-row gap-2 w-full sm:w-auto">
@@ -278,13 +278,13 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
           )}
           <Button onClick={downloadCSV} variant="outline" className="shrink-0 w-full sm:w-auto">
             <FileDown />
-            Export as CSV
+            Export
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row gap-2 mb-4">
-          <div className="relative w-full sm:flex-1">
+        <div className="flex flex-col md:flex-row gap-2 mb-4">
+          <div className="relative w-full md:flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search by name or roll no..."
@@ -293,7 +293,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
               className="pl-10"
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:flex-1">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:flex-1">
             <Select value={filters.department} onValueChange={(v) => handleFilterChange('department', v)}>
               <SelectTrigger><SelectValue placeholder="Department" /></SelectTrigger>
               <SelectContent>
@@ -340,7 +340,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                         )}
                     </TableHead>
                     {tableHeaders.map(header => (
-                        <TableHead key={header.key || 'actions'} className="px-2 first:px-4">
+                        <TableHead key={header.key || 'actions'} className="px-2 first:px-4 text-xs sm:text-sm">
                            {header.hideSort || (isViewer && header.label === 'Actions') ? (
                              <span className="px-2">{header.label}</span>
                            ) : (
@@ -370,8 +370,8 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                         </TableCell>
                         <TableCell className="font-medium px-4">{reg.name}</TableCell>
                         <TableCell className="px-2">{reg.rollNumber}</TableCell>
-                        <TableCell className="px-2">{reg.department}</TableCell>
-                        <TableCell className="px-2">{reg.year}</TableCell>
+                        <TableCell className="px-2 hidden sm:table-cell">{reg.department}</TableCell>
+                        <TableCell className="px-2 hidden md:table-cell">{reg.year}</TableCell>
                         <TableCell className="px-2">
                           <div className="flex flex-col">
                             <span>{reg.event1}</span>
@@ -399,7 +399,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                                 )}
                             </div>
                         </TableCell>
-                        <TableCell className="px-2">{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
+                        <TableCell className="px-2 hidden lg:table-cell">{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
                         <TableCell className="px-2">
                             {!isViewer && (
                               <AlertDialog>
