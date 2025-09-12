@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { QuizRound, QuizQuestion } from '@/ai/flows/get-quiz-questions';
+import type { QuizRound } from '@/lib/quiz-types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
