@@ -249,35 +249,6 @@ export default function RegistrationFlow() {
                 <CardDescription>Follow the steps below to complete your registration.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
-                {/* PRE-UPLOAD FORM: Name and Roll Number */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border rounded-lg bg-muted/20">
-                     <FormField name="name" control={form.control} render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Full Name</FormLabel>
-                            <FormControl>
-                                <Input 
-                                    placeholder="Enter your full name" 
-                                    {...field} 
-                                    disabled={submissionStatus !== 'idle'} 
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}/>
-                     <FormField name="rollNumber" control={form.control} render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Roll Number</FormLabel>
-                            <FormControl>
-                                <Input 
-                                    placeholder="Enter your roll number" 
-                                    {...field} 
-                                    disabled={submissionStatus !== 'idle'} 
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}/>
-                </div>
                 
                 {/* STEP 1: PAYMENT */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 border rounded-lg">
@@ -341,6 +312,35 @@ export default function RegistrationFlow() {
                      <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Complete Your Registration</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            {/* PRE-UPLOAD FORM: Name and Roll Number */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border rounded-lg bg-muted/20">
+                                <FormField name="name" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Full Name</FormLabel>
+                                        <FormControl>
+                                            <Input 
+                                                placeholder="Enter your full name" 
+                                                {...field} 
+                                                disabled={submissionStatus !== 'idle'} 
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}/>
+                                <FormField name="rollNumber" control={form.control} render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Roll Number</FormLabel>
+                                        <FormControl>
+                                            <Input 
+                                                placeholder="Enter your roll number" 
+                                                {...field} 
+                                                disabled={submissionStatus !== 'idle'} 
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}/>
+                            </div>
                             <fieldset disabled={isFormDisabled || submissionStatus === 'saving'} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <FormField name="department" control={form.control} render={({ field }) => (
