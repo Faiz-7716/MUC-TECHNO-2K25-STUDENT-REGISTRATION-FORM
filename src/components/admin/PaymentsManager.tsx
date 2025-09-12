@@ -40,6 +40,14 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
     }, [payments, filter]);
     
     const handleApprove = async (id: string) => {
+        if (isViewer) {
+            toast({
+                title: "Read-Only Mode",
+                description: "You do not have permission to approve payments.",
+                variant: "destructive",
+            });
+            return;
+        }
         try {
             await onUpdateFeeStatus(id, true);
             toast({
@@ -56,12 +64,20 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
     };
 
     const handleReject = async (id: string) => {
+        if (isViewer) {
+            toast({
+                title: "Read-Only Mode",
+                description: "You do not have permission to modify payments.",
+                variant: "destructive",
+            });
+            return;
+        }
          try {
             await onUpdateFeeStatus(id, false);
             toast({
-                title: "Payment Rejected",
+                title: "Payment Status Reverted",
                 description: "The registration has been marked as unpaid.",
-                variant: 'destructive'
+                variant: 'default'
             });
         } catch (error) {
             toast({
@@ -89,7 +105,7 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                             Pending ({payments.filter(p => !p.feePaid).length})
                         </Button>
                         <Button
-                             variant={filter === 'approved' ? 'default' : 'outline'}
+                             variant={filter === 'approved' ? 'secondary' : 'outline'}
                             onClick={() => setFilter('approved')}
                         >
                             Approved ({payments.filter(p => p.feePaid).length})
@@ -99,8 +115,10 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
             </CardHeader>
             <CardContent>
                 {filteredPayments.length === 0 ? (
-                    <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground">No {filter} payments found.</p>
+                    <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed rounded-lg">
+                        <Wallet className="h-12 w-12 text-muted-foreground mb-4"/>
+                        <p className="text-muted-foreground font-medium">No {filter} payments found.</p>
+                        <p className="text-sm text-muted-foreground">New submissions will appear here automatically.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -113,7 +131,7 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                                 <CardContent className="p-0 aspect-square relative group">
                                      <Dialog>
                                         <DialogTrigger asChild>
-                                            <button className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                                 <ZoomIn className="h-10 w-10 text-white"/>
                                             </button>
                                         </DialogTrigger>
@@ -138,23 +156,21 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                                         </DialogContent>
                                     </Dialog>
                                 </CardContent>
-                                <CardFooter className="p-2 bg-muted/50">
-                                    {!isViewer && (
+                                {!isViewer && (
+                                     <CardFooter className="p-2 bg-muted/50">
                                         <div className="w-full flex gap-2">
                                             {filter === 'pending' ? (
-                                                <>
-                                                    <Button size="sm" className="w-full" onClick={() => handleApprove(reg.id)}>
-                                                        <Check className="mr-2"/> Approve
-                                                    </Button>
-                                                </>
+                                                <Button size="sm" className="w-full" onClick={() => handleApprove(reg.id)}>
+                                                    <Check className="mr-2"/> Approve
+                                                </Button>
                                             ) : (
                                                  <Button size="sm" variant="destructive" className="w-full" onClick={() => handleReject(reg.id)}>
                                                     <X className="mr-2"/> Mark as Unpaid
                                                 </Button>
                                             )}
                                         </div>
-                                    )}
-                                </CardFooter>
+                                    </CardFooter>
+                                )}
                             </Card>
                         ))}
                     </div>
