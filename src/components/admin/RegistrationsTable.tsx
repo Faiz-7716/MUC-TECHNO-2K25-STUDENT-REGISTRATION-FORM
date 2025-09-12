@@ -33,11 +33,12 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, FileDown, Search, Trash2, X } from 'lucide-react';
+import { ArrowUpDown, FileDown, Search, Trash2, X, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import Link from 'next/link';
 
 
 interface RegistrationsTableProps {
@@ -389,6 +390,13 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                                         onCheckedChange={(newStatus) => handleFeeStatusChange(reg.id, newStatus)}
                                         aria-label="Fee payment status"
                                     />
+                                )}
+                                 {reg.paymentScreenshotUrl && (
+                                   <Button asChild variant="ghost" size="icon">
+                                        <Link href={reg.paymentScreenshotUrl} target="_blank" rel="noopener noreferrer">
+                                            <Eye className="h-4 w-4"/>
+                                        </Link>
+                                   </Button>
                                 )}
                             </div>
                         </TableCell>

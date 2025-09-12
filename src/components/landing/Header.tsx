@@ -1,5 +1,7 @@
-import { Calendar } from "lucide-react";
+import { Calendar, CreditCard } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 export default function Header() {
   return (
@@ -28,9 +30,17 @@ export default function Header() {
           className="w-16 h-16 md:w-24 md:h-24 object-contain"
         />
       </div>
-       <div className="inline-flex items-center justify-center gap-2 text-primary font-semibold bg-primary/10 px-4 py-2 rounded-full text-sm sm:text-base">
-        <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
-        <span>September 25, 2025</span>
+       <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+         <div className="inline-flex items-center justify-center gap-2 text-primary font-semibold bg-primary/10 px-4 py-2 rounded-full text-sm sm:text-base">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span>September 25, 2025</span>
+        </div>
+        <Link href="/pay-online" passHref>
+            <Button variant="outline" className="rounded-full">
+                <CreditCard className="mr-2"/>
+                Pay Online
+            </Button>
+        </Link>
       </div>
       <p className="text-sm md:text-lg text-muted-foreground font-medium max-w-2xl mx-auto">
           Mazharul Uloom College (Autonomous), Ambur.
