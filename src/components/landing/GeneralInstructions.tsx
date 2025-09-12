@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Info, Award, Trophy, Users, Phone, IndianRupee, HandMetal, FileCheck, XOctagon, School } from "lucide-react";
+import { Info, Award, Trophy, Users, Phone, IndianRupee, HandMetal, FileCheck, XOctagon, School, QrCode } from "lucide-react";
 
 const instructions = [
     {
@@ -7,8 +7,8 @@ const instructions = [
         text: "Registration Fee is only ₹50 per head.",
     },
     {
-        icon: School,
-        text: "Registration fees must be submitted to the concerned department incharge one day prior to the event.",
+        icon: QrCode,
+        text: "Payment should be made online via UPI, and a screenshot must be uploaded during registration.",
     },
     {
         icon: Award,
