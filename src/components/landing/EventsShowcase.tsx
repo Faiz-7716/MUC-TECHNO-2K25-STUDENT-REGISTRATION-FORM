@@ -1,3 +1,4 @@
+
 import {
   Accordion,
   AccordionContent,
@@ -36,7 +37,7 @@ const eventDetails = [
   {
     icon: CodeXml,
     title: "Web Wizards",
-    description: "A web design competition for two-person teams. Participants have 45 minutes to build a website for the 'MUC TECHNO 2k25' event.",
+    description: "A web design competition for two-person teams. All necessary assets (logos, banners, brochures, and content) will be provided. Participants have 45 minutes to build a website for the 'MUC TECHNO 2k25' event.",
     venue: "Allied Lab",
     time: "11:15 AM - 12:00 PM",
     rules: "Key rules: No internet access allowed.",
