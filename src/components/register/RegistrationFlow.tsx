@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -29,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, QrCode, FileUp, CheckCircle, PartyPopper, FileWarning, Send, UploadCloud } from "lucide-react";
+import { Loader2, QrCode, FileUp, CheckCircle, PartyPopper, FileWarning, Send } from "lucide-react";
 import Image from "next/image";
 import { Progress } from "../ui/progress";
 import { Checkbox } from "../ui/checkbox";
@@ -58,7 +59,7 @@ const formSchema = z.object({
     path: ["event2"],
 });
 
-type SubmissionStatus = 'idle' | 'uploading' | 'upload-success' | 'saving' | 'success' | 'error';
+type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
 
@@ -67,7 +68,6 @@ export default function RegistrationFlow() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -117,90 +117,84 @@ export default function RegistrationFlow() {
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-        setFileError("Please select a screenshot file first.");
-        return;
-    }
+  /**
+   * Handles the file upload to Firebase Storage.
+   * @param file The file to upload.
+   * @param rollNumber The student's roll number for unique naming.
+   * @returns A promise that resolves with the public download URL of the uploaded file.
+   */
+  const uploadScreenshot = (file: File, rollNumber: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const rollNumberUpper = rollNumber.toUpperCase();
+        const fileExtension = file.name.split('.').pop();
+        const storageRef = ref(storage, `payment_screenshots/${rollNumberUpper}_${Date.now()}.${fileExtension}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
 
-    const rollNumber = form.getValues('rollNumber');
-    const name = form.getValues('name');
-    if (!rollNumber || !name) {
-        toast({
-            title: "Details Missing",
-            description: "Please fill in your Name and Roll Number before uploading.",
-            variant: "destructive"
-        });
-        // Briefly highlight the fields
-        form.trigger(['name', 'rollNumber']);
-        return;
-    }
-
-
-    setSubmissionStatus('uploading');
-    setFileError(null);
-    const rollNumberUpper = rollNumber.toUpperCase();
-
-    // Check for existing roll number
-    const q = query(collection(db, "registrations_2k25"), where("rollNumber", "==", rollNumberUpper));
-    try {
-      const querySnapshot = await getDocs(q);
-      if (!querySnapshot.empty) {
-        toast({
-          title: "Registration Failed",
-          description: "This roll number has already been registered.",
-          variant: "destructive",
-        });
-        setSubmissionStatus('idle');
-        return;
-      }
-    } catch (error) {
-       console.error("Error checking for existing roll number: ", error);
-       toast({ title: "Verification Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
-       setSubmissionStatus('error');
-       return;
-    }
-
-    const fileExtension = selectedFile.name.split('.').pop();
-    const storageRef = ref(storage, `payment_screenshots/${rollNumberUpper}_${Date.now()}.${fileExtension}`);
-    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-
-    uploadTask.on('state_changed',
-        (snapshot) => setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100),
-        (error) => {
-            console.error("Upload failed:", error);
-            toast({ title: "Upload Failed", description: "Could not upload your screenshot.", variant: "destructive" });
-            setSubmissionStatus('error');
-        },
-        async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            setScreenshotUrl(downloadURL);
-            setSubmissionStatus('upload-success');
-            toast({
-                title: "Upload Successful",
-                description: "Your screenshot has been uploaded. Please complete the form below.",
-            });
-        }
-    );
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+            },
+            (error) => {
+                console.error("Upload failed:", error);
+                toast({ title: "Upload Failed", description: "Could not upload your screenshot. Please try again.", variant: "destructive" });
+                reject(error);
+            },
+            async () => {
+                try {
+                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                    toast({
+                        title: "Upload Successful",
+                        description: "Your screenshot has been uploaded.",
+                    });
+                    resolve(downloadURL);
+                } catch (error) {
+                    console.error("Failed to get download URL:", error);
+                    toast({ title: "Upload Failed", description: "Could not retrieve the file URL.", variant: "destructive" });
+                    reject(error);
+                }
+            }
+        );
+    });
   }
 
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (submissionStatus !== 'upload-success' || !screenshotUrl) {
+    if (!selectedFile) {
         toast({
-            title: "Upload Required",
-            description: "Please upload your payment screenshot before submitting.",
+            title: "Screenshot Required",
+            description: "Please select your payment screenshot before submitting.",
             variant: "destructive"
         });
         return;
     }
-    setSubmissionStatus('saving');
+
+    setSubmissionStatus('submitting');
+    setFileError(null);
     
     try {
         const rollNumberUpper = values.rollNumber.toUpperCase();
+
+        // Check for existing roll number before doing anything else
+        const q = query(collection(db, "registrations_2k25"), where("rollNumber", "==", rollNumberUpper));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            toast({
+              title: "Registration Failed",
+              description: "This roll number has already been registered.",
+              variant: "destructive",
+            });
+            setSubmissionStatus('idle');
+            return;
+        }
+        
+        // 1. Upload the screenshot and wait for the URL
+        const downloadURL = await uploadScreenshot(selectedFile, values.rollNumber);
+
+        // 2. Once URL is available, save everything to Firestore
         const registrationData = {
             ...values,
             rollNumber: rollNumberUpper,
-            paymentScreenshotUrl: screenshotUrl,
+            paymentScreenshotUrl: downloadURL,
             feePaid: false, // All online payments need verification
             createdAt: serverTimestamp(),
         };
@@ -209,9 +203,13 @@ export default function RegistrationFlow() {
         setSubmissionStatus('success');
         
     } catch (error) {
-        console.error("Error saving registration: ", error);
-        toast({ title: "Submission Failed", description: "Could not save your registration.", variant: "destructive" });
+        console.error("Error during submission: ", error);
         setSubmissionStatus('error');
+        // Specific error toasts are handled within the upload function,
+        // but we can have a generic one here for other potential issues.
+        if (submissionStatus !== 'idle') { // Avoid double-toasting
+             toast({ title: "Submission Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
+        }
     }
   }
 
@@ -221,7 +219,6 @@ export default function RegistrationFlow() {
     setSelectedFile(null);
     setFileError(null);
     setUploadProgress(0);
-    setScreenshotUrl(null);
   }
 
   if (submissionStatus === 'success') {
@@ -242,8 +239,7 @@ export default function RegistrationFlow() {
     )
   }
 
-  const isFormDisabled = submissionStatus !== 'upload-success';
-  const isUploadInProgress = submissionStatus === 'uploading';
+  const isSubmitting = submissionStatus === 'submitting';
 
   return (
     <section id="register">
@@ -254,7 +250,7 @@ export default function RegistrationFlow() {
             </CardHeader>
             <CardContent className="space-y-8">
                 
-                {/* STEP 1: PAYMENT */}
+                {/* STEP 1: PAYMENT & UPLOAD */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 border rounded-lg">
                     <div className="space-y-4">
                         <h3 className="font-headline text-xl font-bold flex items-center gap-2"><QrCode /> Step 1: Scan & Pay</h3>
@@ -267,44 +263,36 @@ export default function RegistrationFlow() {
                             className="rounded-lg border-4 border-primary shadow-lg mx-auto"
                         />
                     </div>
-                     {/* STEP 2: UPLOAD */}
                     <div className="space-y-4">
-                        <h3 className="font-headline text-xl font-bold flex items-center gap-2"><FileUp /> Step 2: Upload Proof</h3>
-                         <p className="text-muted-foreground">After payment, take a screenshot and upload it here. Your name and roll number are required before uploading.</p>
+                        <h3 className="font-headline text-xl font-bold flex items-center gap-2"><FileUp /> Step 2: Select Screenshot</h3>
+                         <p className="text-muted-foreground">After payment, take a screenshot and select it here. You will submit everything together at the end.</p>
                         
                         <div className="space-y-2">
                              <Input 
                                 type="file" 
                                 accept={ALLOWED_FILE_TYPES.join(',')}
-                                disabled={isUploadInProgress || submissionStatus === 'upload-success'}
+                                disabled={isSubmitting}
                                 onChange={handleFileChange}
                                 className="file:text-foreground"
                             />
                             {fileError && <p className="text-sm font-medium text-destructive flex items-center gap-2 mt-2"><FileWarning className="h-4 w-4" /> {fileError}</p>}
                         </div>
 
-                        {selectedFile && submissionStatus !== 'uploading' && submissionStatus !== 'upload-success' && (
-                             <Button onClick={handleUpload} className="w-full">
-                                <UploadCloud className="mr-2" />
-                                Upload Screenshot to Continue
-                            </Button>
-                        )}
-                        
-                        {isUploadInProgress && (
+                         {isSubmitting && (
                             <div className="space-y-2 pt-2">
                                 <Progress value={uploadProgress} />
                                 <p className="text-sm font-semibold text-primary animate-pulse text-center">
-                                    Uploading screenshot... {Math.round(uploadProgress)}%
+                                    Submitting registration... {Math.round(uploadProgress)}%
                                 </p>
                             </div>
                         )}
                         
-                        {submissionStatus === 'upload-success' && (
+                        {selectedFile && !isSubmitting && (
                             <div className="flex items-center gap-3 p-3 rounded-md bg-green-50 border border-green-200 text-green-700">
                                 <CheckCircle className="h-6 w-6" />
                                 <div className="flex flex-col">
-                                    <span className="font-bold">Upload Complete!</span>
-                                    <span className="text-sm">You can now fill out the rest of the form.</span>
+                                    <span className="font-bold truncate max-w-xs">Selected: {selectedFile.name}</span>
+                                    <span className="text-sm">Ready to be uploaded with your form.</span>
                                 </div>
                             </div>
                         )}
@@ -313,40 +301,17 @@ export default function RegistrationFlow() {
 
                 {/* STEP 3: REGISTRATION FORM */}
                 <div>
-                     <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Complete Your Registration</h3>
+                     <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Fill Details & Submit</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            {/* PRE-UPLOAD FORM: Name and Roll Number */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 border rounded-lg bg-muted/20">
-                                <FormField name="name" control={form.control} render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Full Name</FormLabel>
-                                        <FormControl>
-                                            <Input 
-                                                placeholder="Enter your full name" 
-                                                {...field} 
-                                                disabled={submissionStatus === 'upload-success' || submissionStatus === 'saving'} 
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}/>
-                                <FormField name="rollNumber" control={form.control} render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Roll Number</FormLabel>
-                                        <FormControl>
-                                            <Input 
-                                                placeholder="Enter your roll number" 
-                                                {...field} 
-                                                disabled={submissionStatus === 'upload-success' || submissionStatus === 'saving'}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}/>
-                            </div>
-                            <fieldset disabled={isFormDisabled || submissionStatus === 'saving'} className={`space-y-6 transition-opacity duration-500 ${isFormDisabled && 'opacity-50 pointer-events-none'}`}>
+                            <fieldset disabled={isSubmitting} className={`space-y-6 transition-opacity duration-500 ${isSubmitting && 'opacity-50 pointer-events-none'}`}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField name="name" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField name="rollNumber" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Roll Number</FormLabel><FormControl><Input placeholder="Enter your roll number" {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
                                     <FormField name="department" control={form.control} render={({ field }) => (
                                         <FormItem><FormLabel>Department</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your department" /></SelectTrigger></FormControl><SelectContent>{departments.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
                                     )}/>
@@ -374,17 +339,10 @@ export default function RegistrationFlow() {
                                     )}
                                 </div>
                             </fieldset>
-                            {submissionStatus === 'saving' && (
-                                <div className="space-y-2">
-                                    <p className="text-sm font-semibold text-primary animate-pulse text-center">
-                                        Finalizing registration...
-                                    </p>
-                                </div>
-                            )}
-
-                            <Button type="submit" disabled={isFormDisabled || submissionStatus === 'saving'} className="w-full md:w-auto">
-                                {submissionStatus === 'saving' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                                {submissionStatus === 'saving' ? "Submitting..." : "Submit Registration"}
+                            
+                            <Button type="submit" disabled={isSubmitting || !selectedFile} className="w-full md:w-auto">
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                                {isSubmitting ? "Submitting..." : "Submit Registration"}
                             </Button>
                         </form>
                     </Form>
@@ -394,5 +352,3 @@ export default function RegistrationFlow() {
     </section>
   );
 }
-
-    
