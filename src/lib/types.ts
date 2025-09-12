@@ -29,7 +29,7 @@ export interface RegistrationData {
   event2?: EventName;
   teamMember2?: string;
   feePaid: boolean;
-  paymentScreenshotUrl?: string;
+  paymentScreenshotBase64?: string;
 }
 
 export interface Registration extends RegistrationData {

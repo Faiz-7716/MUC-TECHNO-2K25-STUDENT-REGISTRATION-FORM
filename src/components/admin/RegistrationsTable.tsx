@@ -178,7 +178,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
   };
   
   const downloadCSV = () => {
-    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Fee Status', 'Fee Amount', 'Registered At', 'Payment Screenshot URL'];
+    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Fee Status', 'Fee Amount', 'Registered At', 'Payment Screenshot Base64'];
     const csvRows = [
       headers.join(','),
       ...filteredData.map(row => [
@@ -193,7 +193,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
         `"${row.feePaid ? 'Paid' : 'Unpaid'}"`,
         `"${row.feePaid ? REGISTRATION_FEE : 0}"`,
         `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"`,
-        `"${row.paymentScreenshotUrl || 'N/A'}"`
+        `"${row.paymentScreenshotBase64 ? 'true' : 'false'}"` // Indicate if Base64 is present
       ].join(','))
     ];
     
@@ -392,12 +392,10 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                                         aria-label="Fee payment status"
                                     />
                                 )}
-                                {reg.paymentScreenshotUrl && (
-                                   <Button asChild variant="ghost" size="icon" title="View Payment Proof">
-                                        <Link href={reg.paymentScreenshotUrl} target="_blank" rel="noopener noreferrer">
-                                            <Eye className="h-4 w-4"/>
-                                        </Link>
-                                   </Button>
+                                {reg.paymentScreenshotBase64 && (
+                                   <div className="text-muted-foreground" title="Payment proof available">
+                                        <Eye className="h-4 w-4"/>
+                                   </div>
                                 )}
                             </div>
                         </TableCell>

@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,8 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { addDoc, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { departments, years, events, teamEvents, EventName, eventTimes, REGISTRATION_FEE } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
@@ -32,7 +30,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, QrCode, FileUp, CheckCircle, PartyPopper, FileWarning, Send } from "lucide-react";
 import Image from "next/image";
-import { Progress } from "../ui/progress";
 import { Checkbox } from "../ui/checkbox";
 
 const formSchema = z.object({
@@ -60,14 +57,29 @@ const formSchema = z.object({
 });
 
 type SubmissionStatus = 'idle' | 'submitting' | 'success' | 'error';
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB for Firestore document limit
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+
+
+/**
+ * Converts a File object to a Base64 string.
+ * @param file The file to convert.
+ * @returns A promise that resolves with the Base64 data URL.
+ */
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+    });
+};
+
 
 export default function RegistrationFlow() {
   const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -77,10 +89,6 @@ export default function RegistrationFlow() {
       rollNumber: "",
       mobileNumber: "",
       teamMember2: "",
-      event1: undefined,
-      event2: undefined,
-      department: undefined,
-      year: undefined,
       addEvent2: false,
     },
   });
@@ -117,46 +125,6 @@ export default function RegistrationFlow() {
     }
   };
 
-  /**
-   * Handles the file upload to Firebase Storage.
-   * @param file The file to upload.
-   * @param rollNumber The student's roll number for unique naming.
-   * @returns A promise that resolves with the public download URL of the uploaded file.
-   */
-  const uploadScreenshot = (file: File, rollNumber: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const rollNumberUpper = rollNumber.toUpperCase();
-        const fileExtension = file.name.split('.').pop();
-        const storageRef = ref(storage, `payment_screenshots/${rollNumberUpper}_${Date.now()}.${fileExtension}`);
-        const uploadTask = uploadBytesResumable(storageRef, file);
-
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                setUploadProgress((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-                toast({ title: "Upload Failed", description: "Could not upload your screenshot. Please try again.", variant: "destructive" });
-                reject(error);
-            },
-            async () => {
-                try {
-                    const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                    toast({
-                        title: "Upload Successful",
-                        description: "Your screenshot has been uploaded.",
-                    });
-                    resolve(downloadURL);
-                } catch (error) {
-                    console.error("Failed to get download URL:", error);
-                    toast({ title: "Upload Failed", description: "Could not retrieve the file URL.", variant: "destructive" });
-                    reject(error);
-                }
-            }
-        );
-    });
-  }
-
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!selectedFile) {
@@ -187,14 +155,15 @@ export default function RegistrationFlow() {
             return;
         }
         
-        // 1. Upload the screenshot and wait for the URL
-        const downloadURL = await uploadScreenshot(selectedFile, values.rollNumber);
+        // 1. Convert the file to Base64
+        const base64String = await fileToBase64(selectedFile);
+        toast({ title: "Image Processed", description: "Your screenshot is ready for submission." });
 
-        // 2. Once URL is available, save everything to Firestore
+        // 2. Save everything to Firestore
         const registrationData = {
             ...values,
             rollNumber: rollNumberUpper,
-            paymentScreenshotUrl: downloadURL,
+            paymentScreenshotBase64: base64String,
             feePaid: false, // All online payments need verification
             createdAt: serverTimestamp(),
         };
@@ -205,11 +174,7 @@ export default function RegistrationFlow() {
     } catch (error) {
         console.error("Error during submission: ", error);
         setSubmissionStatus('error');
-        // Specific error toasts are handled within the upload function,
-        // but we can have a generic one here for other potential issues.
-        if (submissionStatus !== 'idle') { // Avoid double-toasting
-             toast({ title: "Submission Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
-        }
+        toast({ title: "Submission Failed", description: "An unexpected error occurred. Please try again.", variant: "destructive" });
     }
   }
 
@@ -218,7 +183,6 @@ export default function RegistrationFlow() {
     setSubmissionStatus('idle');
     setSelectedFile(null);
     setFileError(null);
-    setUploadProgress(0);
   }
 
   if (submissionStatus === 'success') {
@@ -279,10 +243,10 @@ export default function RegistrationFlow() {
                         </div>
 
                          {isSubmitting && (
-                            <div className="space-y-2 pt-2">
-                                <Progress value={uploadProgress} />
-                                <p className="text-sm font-semibold text-primary animate-pulse text-center">
-                                    Submitting registration... {Math.round(uploadProgress)}%
+                            <div className="space-y-2 pt-2 text-center">
+                                <Loader2 className="h-6 w-6 text-primary animate-spin mx-auto"/>
+                                <p className="text-sm font-semibold text-primary animate-pulse">
+                                    Submitting registration...
                                 </p>
                             </div>
                         )}
@@ -292,7 +256,7 @@ export default function RegistrationFlow() {
                                 <CheckCircle className="h-6 w-6" />
                                 <div className="flex flex-col">
                                     <span className="font-bold truncate max-w-xs">Selected: {selectedFile.name}</span>
-                                    <span className="text-sm">Ready to be uploaded with your form.</span>
+                                    <span className="text-sm">Ready to be submitted with your form.</span>
                                 </div>
                             </div>
                         )}
@@ -304,7 +268,7 @@ export default function RegistrationFlow() {
                      <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Fill Details & Submit</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <fieldset disabled={isSubmitting} className={`space-y-6 transition-opacity duration-500 ${isSubmitting && 'opacity-50 pointer-events-none'}`}>
+                            <fieldset disabled={isSubmitting || !selectedFile} className={`space-y-6 transition-opacity duration-500 ${isSubmitting || !selectedFile ? 'opacity-50 pointer-events-none' : ''}`}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <FormField name="name" control={form.control} render={({ field }) => (
                                         <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>

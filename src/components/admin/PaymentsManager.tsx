@@ -29,7 +29,7 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
     const [filter, setFilter] = useState<'pending' | 'approved'>('pending');
 
     const payments = useMemo(() => {
-        return registrations.filter(r => r.paymentScreenshotUrl);
+        return registrations.filter(r => r.paymentScreenshotBase64);
     }, [registrations]);
 
     const filteredPayments = useMemo(() => {
@@ -136,7 +136,7 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                                             </button>
                                         </DialogTrigger>
                                         <Image 
-                                            src={reg.paymentScreenshotUrl!}
+                                            src={reg.paymentScreenshotBase64!}
                                             alt={`Payment proof for ${reg.name}`}
                                             fill
                                             className="object-cover"
@@ -147,7 +147,7 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                                             </DialogHeader>
                                             <div className="relative h-[80vh]">
                                                  <Image 
-                                                    src={reg.paymentScreenshotUrl!}
+                                                    src={reg.paymentScreenshotBase64!}
                                                     alt={`Payment proof for ${reg.name}`}
                                                     fill
                                                     className="object-contain"

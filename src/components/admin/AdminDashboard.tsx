@@ -34,7 +34,7 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
 
   const isViewer = accessLevel === 'viewer';
   
-  const paymentsToReview = registrations.filter(r => r.paymentScreenshotUrl && !r.feePaid);
+  const paymentsToReview = registrations.filter(r => r.paymentScreenshotBase64 && !r.feePaid);
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
