@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase/firestore";
 
-export const departments = ["B.Sc. Computer Science", "B.Sc. Data Science", "BCA", "B.Com. CS"] as const;
+export const departments = ["B.Sc. Computer Science", "B.Sc. Data Science", "BCA", "B.Com. CS", "B.Sc. Maths", "B.Com. General", "B.Com. Corporate Secretaryship", "BA Economics", "BBA"] as const;
 export const years = ["1st Year", "2nd Year", "3rd Year"] as const;
 export const events = ["Tech Quiz", "Bug Blaster", "Panel Debate", "Web Wizards", "Design Duel"] as const;
 export const teamEvents = ["Panel Debate", "Web Wizards"];

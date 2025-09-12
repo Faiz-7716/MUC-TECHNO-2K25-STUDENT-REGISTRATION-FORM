@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -72,7 +72,6 @@ const formSchema = z.object({
         const time2 = eventTimes[data.event2];
         if (time1.startsWith('10:15') && time2.startsWith('10:15')) return false;
         if (time1.startsWith('11:15') && time2.startsWith('11:15')) return false;
-        if (time1.startsWith('11:15') && time2.startsWith('11:15')) return false;
     }
     return true;
 }, {
@@ -103,6 +102,16 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
 
   const selectedEvent1 = form.watch("event1");
   const addEvent2 = form.watch("addEvent2");
+  const selectedDepartment = form.watch("department");
+  
+  useEffect(() => {
+    if (selectedDepartment === "B.Sc. Maths") {
+      form.setValue("year", "3rd Year");
+    }
+  }, [selectedDepartment, form]);
+
+  const availableYears = selectedDepartment === "B.Sc. Maths" ? ["3rd Year"] as const : years;
+
 
   const showTeamMemberField = teamEvents.includes(selectedEvent1 as EventName);
 
@@ -111,7 +120,7 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
 
     const registrationData: RegistrationData = {
         name: values.name,
-        rollNumber: values.rollNumber,
+        rollNumber: values.rollNumber.toUpperCase(),
         department: values.department,
         year: values.year,
         mobileNumber: values.mobileNumber,
@@ -219,14 +228,18 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Year</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select 
+                                        onValueChange={field.onChange} 
+                                        value={field.value}
+                                        disabled={selectedDepartment === 'B.Sc. Maths'}
+                                    >
                                         <FormControl>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Select year" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                                            {availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
