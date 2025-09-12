@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp, query, where, getDocs } from "firebase/firestore";
 import { getDb } from "@/lib/firebase";
 import { departments, years, events, teamEvents, EventName, eventTimes } from "@/lib/types";
 
@@ -41,40 +41,24 @@ const formSchema = z.object({
   event2: z.enum(events).optional(),
   teamMember2: z.string().optional(),
 }).refine(data => {
-    if (teamEvents.includes(data.event1) && !data.teamMember2) {
-      // Optional, but you could enforce team member for team events
-      return true; 
-    }
-    return true;
-}, {
-    message: "Team member name is required for this event.",
-    path: ["teamMember2"],
-}).refine(data => {
-    if (data.addEvent2 && !data.event2) {
-        return false;
-    }
-    return true;
-}, {
-    message: "Please select a second event.",
-    path: ["event2"],
-}).refine(data => {
-    if(data.addEvent2 && data.event1 === data.event2) {
-        return false;
-    }
-    return true;
-}, {
-    message: "You cannot select the same event twice.",
-    path: ["event2"],
-}).refine(data => {
-    if (data.addEvent2 && data.event1 && data.event2) {
+    if (data.addEvent2) {
+        if (!data.event2) {
+            return false;
+        }
+        if (data.event1 === data.event2) {
+            return false;
+        }
         const time1 = eventTimes[data.event1];
         const time2 = eventTimes[data.event2];
-        if (time1.startsWith('10:15') && time2.startsWith('10:15')) return false;
-        if (time1.startsWith('11:15') && time2.startsWith('11:15')) return false;
+        if (time1 && time2) {
+            const t1 = time1.split('-')[0];
+            const t2 = time2.split('-')[0];
+            if (t1 === t2) return false;
+        }
     }
     return true;
 }, {
-    message: "These two events are at the same time. Please choose events in different time slots.",
+    message: "You cannot select the same event, or two events at the same time slot.",
     path: ["event2"],
 });
 
@@ -113,6 +97,33 @@ export default function RegistrationForm() {
     setIsSubmitting(true);
     const db = getDb();
 
+    // Check for existing roll number
+    const rollNumberUpper = values.rollNumber.toUpperCase();
+    const q = query(collection(db, "registrations_2k25"), where("rollNumber", "==", rollNumberUpper));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        toast({
+          title: "Registration Failed",
+          description: "This roll number has already been registered.",
+          variant: "destructive",
+        });
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (error) {
+       console.error("Error checking for existing roll number: ", error);
+       toast({
+        title: "Registration Failed",
+        description: "Something went wrong while verifying your details. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+
     const registrationData: {
         name: string;
         rollNumber: string;
@@ -126,7 +137,7 @@ export default function RegistrationForm() {
         feePaid: boolean;
     } = {
         name: values.name,
-        rollNumber: values.rollNumber.toUpperCase(),
+        rollNumber: rollNumberUpper,
         department: values.department,
         year: values.year,
         mobileNumber: values.mobileNumber,
