@@ -254,44 +254,45 @@ export default function RegistrationFlow() {
                     </div>
                 </div>
 
-                <div className={`transition-opacity duration-500 ${selectedFile ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                <div className={`transition-opacity duration-500 ${!selectedFile && 'opacity-50 pointer-events-none'}`}>
                      <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Fill Your Details</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <FormField name="name" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="rollNumber" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Roll Number</FormLabel><FormControl><Input placeholder="Enter your roll number" {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="department" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Department</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your department" /></SelectTrigger></FormControl><SelectContent>{departments.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="year" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Year</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={selectedDepartment === "B.Sc. Maths"}><FormControl><SelectTrigger><SelectValue placeholder="Select your year" /></SelectTrigger></FormControl><SelectContent>{availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="mobileNumber" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Mobile Number</FormLabel><FormControl><Input type="tel" placeholder="Enter your 10-digit mobile number" {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="event1" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Event 1</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select an event" /></SelectTrigger></FormControl><SelectContent>{events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
-                                )}/>
-                                {showTeamMemberField && (
-                                    <FormField name="teamMember2" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Team Member Name (Optional)</FormLabel><FormControl><Input placeholder="Enter team member's name" {...field} /></FormControl><FormMessage /></FormItem>
+                            <fieldset disabled={!selectedFile || submissionStatus !== 'idle'} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <FormField name="name" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
-                                )}
-                                 <FormField name="addEvent2" control={form.control} render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl><div className="space-y-1 leading-none"><FormLabel>Register for a second event?</FormLabel></div></FormItem>
-                                )}/>
-                                {addEvent2 && (
-                                     <FormField name="event2" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Event 2</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a second event" /></SelectTrigger></FormControl><SelectContent>{events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                                    <FormField name="rollNumber" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Roll Number</FormLabel><FormControl><Input placeholder="Enter your roll number" {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
-                                )}
-                            </div>
-
+                                    <FormField name="department" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Department</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your department" /></SelectTrigger></FormControl><SelectContent>{departments.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField name="year" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Year</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={selectedDepartment === "B.Sc. Maths"}><FormControl><SelectTrigger><SelectValue placeholder="Select your year" /></SelectTrigger></FormControl><SelectContent>{availableYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField name="mobileNumber" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Mobile Number</FormLabel><FormControl><Input type="tel" placeholder="Enter your 10-digit mobile number" {...field} /></FormControl><FormMessage /></FormItem>
+                                    )}/>
+                                    <FormField name="event1" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Event 1</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select an event" /></SelectTrigger></FormControl><SelectContent>{events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                                    )}/>
+                                    {showTeamMemberField && (
+                                        <FormField name="teamMember2" control={form.control} render={({ field }) => (
+                                            <FormItem><FormLabel>Team Member Name (Optional)</FormLabel><FormControl><Input placeholder="Enter team member's name" {...field} /></FormControl><FormMessage /></FormItem>
+                                        )}/>
+                                    )}
+                                    <FormField name="addEvent2" control={form.control} render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4 md:col-span-2"><FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange}/></FormControl><div className="space-y-1 leading-none"><FormLabel>Register for a second event?</FormLabel></div></FormItem>
+                                    )}/>
+                                    {addEvent2 && (
+                                        <FormField name="event2" control={form.control} render={({ field }) => (
+                                            <FormItem><FormLabel>Event 2</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select a second event" /></SelectTrigger></FormControl><SelectContent>{events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
+                                        )}/>
+                                    )}
+                                </div>
+                            </fieldset>
                             {(submissionStatus === 'uploading' || submissionStatus === 'saving') && (
                                 <div className="space-y-2">
                                     <Progress value={uploadProgress} />
