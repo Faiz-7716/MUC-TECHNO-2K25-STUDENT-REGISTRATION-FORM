@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { addDoc, collection, query, where, getDocs, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { getDb, getStorage } from "@/lib/firebase";
+import { db, storage } from "@/lib/firebase";
 import { departments, years, events, teamEvents, EventName, eventTimes, REGISTRATION_FEE } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
@@ -125,9 +125,6 @@ export default function RegistrationFlow() {
         return;
     }
     setSubmissionStatus('uploading');
-
-    const db = getDb();
-    const storage = getStorage();
 
     // Check for existing roll number
     const rollNumberUpper = values.rollNumber.toUpperCase();

@@ -37,7 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, Send } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { getDb } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 
 
 const formSchema = z.object({
@@ -111,7 +111,6 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    const db = getDb();
 
     // Check for existing roll number
     const rollNumberUpper = values.rollNumber.toUpperCase();

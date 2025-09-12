@@ -11,20 +11,10 @@ const firebaseConfig = {
   appId: "1:914242989364:web:61812196d3ef60fb894961"
 };
 
-let app: FirebaseApp;
-let db: Firestore;
-let storage: FirebaseStorage;
+// Initialize Firebase
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
-try {
-    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    db = getFirestore(app);
-    storage = getStorage(app);
-} catch (error) {
-    console.error("Firebase initialization error", error);
-}
-
-
-const getDb = () => db;
-const getStorageInstance = () => storage;
-
-export { app, getDb, getStorageInstance as getStorage };
+// Export the initialized services
+export { app, db, storage };
