@@ -1,7 +1,10 @@
 import Header from '@/components/landing/Header';
 import EventsShowcase from '@/components/landing/EventsShowcase';
-import RegistrationForm from '@/components/landing/RegistrationForm';
 import GeneralInstructions from '@/components/landing/GeneralInstructions';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { PartyPopper } from 'lucide-react';
+import { Card, CardContent, CardDescription } from '@/components/ui/card';
 
 export default function Home() {
   return (
@@ -14,7 +17,22 @@ export default function Home() {
             <EventsShowcase />
           </div>
           <div className="lg:col-span-3">
-            <RegistrationForm />
+             <section id="register">
+                <Card className="w-full flex flex-col items-center justify-center text-center p-8 min-h-[500px] bg-primary/5 border-primary/20">
+                    <div className="animate-in fade-in zoom-in-95 duration-500">
+                        <PartyPopper className="h-24 w-24 text-primary mx-auto" />
+                        <h2 className="font-headline text-4xl font-bold text-primary mt-6">Ready to Participate?</h2>
+                        <CardDescription className="mt-2 text-lg max-w-sm mx-auto">
+                           Click the button below to pay the fee and complete your registration.
+                        </CardDescription>
+                         <Link href="/register">
+                            <Button size="lg" className="mt-8">
+                                Register Now
+                            </Button>
+                        </Link>
+                    </div>
+                </Card>
+            </section>
           </div>
         </main>
          <footer className="text-center text-muted-foreground text-sm mt-16">
