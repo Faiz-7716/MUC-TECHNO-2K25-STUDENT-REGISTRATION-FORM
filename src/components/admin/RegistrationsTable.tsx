@@ -392,7 +392,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                                     />
                                 )}
                                  {reg.paymentScreenshotUrl && (
-                                   <Button asChild variant="ghost" size="icon">
+                                   <Button asChild variant="ghost" size="icon" title="View Payment Proof">
                                         <Link href={reg.paymentScreenshotUrl} target="_blank" rel="noopener noreferrer">
                                             <Eye className="h-4 w-4"/>
                                         </Link>
