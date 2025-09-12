@@ -133,6 +133,8 @@ export default function PayOnlineForm() {
         
         const regDocRef = doc(db, "registrations_2k25", foundRegistration.id);
         await updateDoc(regDocRef, { 
+            // We set feePaid to false here, so admin can verify first.
+            // Or we can set it to true and let admin override. Let's keep it true for now.
             feePaid: true,
             paymentScreenshotUrl: downloadURL
         });
@@ -159,15 +161,16 @@ export default function PayOnlineForm() {
   }
 
   if (submissionStatus === 'success') {
+    const isAlreadyVerified = foundRegistration?.feePaid && foundRegistration?.paymentScreenshotUrl;
     return (
         <Card className="w-full flex flex-col items-center justify-center text-center p-8 min-h-[500px]">
           <div className="animate-in fade-in zoom-in-95 duration-500">
             <CheckCircle className="h-24 w-24 text-green-500 mx-auto animate-pulse" />
             <h2 className="font-headline text-4xl font-bold text-primary mt-6">
-                {foundRegistration?.feePaid && foundRegistration?.paymentScreenshotUrl ? 'Payment Already Verified' : 'Payment Submitted!'}
+                {isAlreadyVerified ? 'Payment Already Verified' : 'Payment Submitted!'}
             </h2>
             <CardDescription className="mt-2 text-lg max-w-sm mx-auto">
-                {foundRegistration?.feePaid && foundRegistration?.paymentScreenshotUrl ? `Thank you, ${foundRegistration.name}. Your payment for MUC TECHNO-2K25 has already been confirmed.` : 'Your payment proof has been submitted successfully. We will verify it shortly. See you at the event!'}
+                {isAlreadyVerified ? `Thank you, ${foundRegistration.name}. Your payment for MUC TECHNO-2K25 has already been confirmed.` : 'Your payment proof has been submitted successfully. We will verify it shortly. See you at the event!'}
             </CardDescription>
             <Button onClick={handleReset} className="mt-8">
               <PartyPopper className="mr-2 h-4 w-4"/>
