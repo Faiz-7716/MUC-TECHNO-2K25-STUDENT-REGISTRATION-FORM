@@ -5,14 +5,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { BrainCircuit, Bug, Users, CodeXml, Palette, User, Clock, Group, Server, Presentation, Ban, Globe, MapPin } from "lucide-react";
+import { BrainCircuit, Bug, Users, CodeXml, Palette, User, Clock, Group, Server, Presentation, Ban, Globe, MapPin, Sparkles } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 
 const eventDetails = [
   {
     icon: BrainCircuit,
     title: "Tech Quiz",
-    description: "A quiz competition with individual prelims and two-person team finals.",
+    description: "A quiz competition with individual prelims and two-person team finals. This event is open for all departments.",
     venue: "Sir Syed Ahmed Convention Hall",
     time: "10:15 AM - 11:15 AM",
     topics: "Topics: Basics of Computer, Logo name finding, acronyms, and cyber security",
@@ -28,7 +28,7 @@ const eventDetails = [
   {
     icon: Users,
     title: "Panel Debate",
-    description: "A paper presentation event for teams of up to two. Each team gets 5 minutes to present followed by a 2-minute Q&A.",
+    description: "A paper presentation event for teams of up to two, open for all departments. Each team gets 5 minutes to present followed by a 2-minute Q&A.",
     venue: "Sir Syed Ahmed Convention Hall",
     time: "11:15 AM - 12:15 PM",
     topics: "Topics: Cyber Security, Machine Learning, Artificial Intelligence, Ethical Hacking, and Cloud Computing.",
@@ -45,7 +45,7 @@ const eventDetails = [
   {
     icon: Palette,
     title: "Design Duel",
-    description: "An individual poster design competition. Participants have 30 minutes to create a promotional poster for the event.",
+    description: "An individual poster design competition, open for all departments. Participants have 30 minutes to create a promotional poster for the event.",
     venue: "Multimedia Room",
     time: "11:15 AM - 11:45 AM",
     rules: "Note: The use of AI tools or pre-made templates is forbidden.",
