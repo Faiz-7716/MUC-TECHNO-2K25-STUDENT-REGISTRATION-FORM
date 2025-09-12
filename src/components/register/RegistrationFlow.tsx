@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -74,6 +75,10 @@ export default function RegistrationFlow() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      name: "",
+      rollNumber: "",
+      mobileNumber: "",
+      teamMember2: "",
       addEvent2: false,
     },
   });
