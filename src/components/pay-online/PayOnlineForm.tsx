@@ -30,7 +30,7 @@ const formSchema = z.object({
   rollNumber: z.string().min(3, { message: "Please enter a valid roll number." }),
 });
 
-type SubmissionStatus = 'idle' | 'verifying' | 'found' | 'not-found' | 'uploading' | 'saving' | 'success' | 'error';
+type SubmissionStatus = 'idle' | 'verifying' | 'found' | 'not-found' | 'uploading' | 'saving' | 'success' | 'error' | 'already-verified';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
@@ -65,7 +65,7 @@ export default function PayOnlineForm() {
         const registrationData = { id: doc.id, ...doc.data() } as Registration;
         setFoundRegistration(registrationData);
         if (registrationData.feePaid && registrationData.paymentScreenshotUrl) {
-          setSubmissionStatus('success'); // Already paid and verified
+          setSubmissionStatus('already-verified');
         } else {
           setSubmissionStatus('found');
         }
@@ -157,17 +157,16 @@ export default function PayOnlineForm() {
     setUploadProgress(0);
   }
 
-  if (submissionStatus === 'success') {
-    const isAlreadyVerified = foundRegistration?.feePaid && foundRegistration?.paymentScreenshotUrl;
+  if (submissionStatus === 'success' || submissionStatus === 'already-verified') {
     return (
         <Card className="w-full flex flex-col items-center justify-center text-center p-8 min-h-[500px]">
           <div className="animate-in fade-in zoom-in-95 duration-500">
             <CheckCircle className="h-24 w-24 text-green-500 mx-auto animate-pulse" />
             <h2 className="font-headline text-4xl font-bold text-primary mt-6">
-                {isAlreadyVerified ? 'Payment Already Verified' : 'Payment Submitted!'}
+                {submissionStatus === 'already-verified' ? 'Payment Already Verified' : 'Payment Submitted!'}
             </h2>
             <CardDescription className="mt-2 text-lg max-w-sm mx-auto">
-                {isAlreadyVerified ? `Thank you, ${foundRegistration?.name}. Your payment for MUC TECHNO-2K25 has already been confirmed.` : 'Your payment proof has been submitted successfully. We will verify it shortly. See you at the event!'}
+                {submissionStatus === 'already-verified' ? `Thank you, ${foundRegistration?.name}. Your payment for MUC TECHNO-2K25 has already been confirmed.` : 'Your payment proof has been submitted successfully. We will verify it shortly. See you at the event!'}
             </CardDescription>
             <Button onClick={handleReset} className="mt-8">
               <PartyPopper className="mr-2 h-4 w-4"/>
