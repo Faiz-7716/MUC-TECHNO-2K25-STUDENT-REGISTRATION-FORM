@@ -104,47 +104,38 @@ export default function PayOnlineForm() {
     const storage = getStorage();
     const db = getDb();
 
-    const uploadPromise = new Promise<string>((resolve, reject) => {
-        const fileExtension = selectedFile.name.split('.').pop();
-        const storageRef = ref(storage, `payment_screenshots/${foundRegistration.rollNumber}_${Date.now()}.${fileExtension}`);
-        const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+    const fileExtension = selectedFile.name.split('.').pop();
+    const storageRef = ref(storage, `payment_screenshots/${foundRegistration.rollNumber}_${Date.now()}.${fileExtension}`);
+    const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
-        uploadTask.on('state_changed',
-            (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                setUploadProgress(progress);
-            },
-            (error) => {
-                console.error("Upload failed:", error);
-                toast({ title: "Upload Failed", description: "Could not upload your screenshot. Please try again.", variant: "destructive" });
-                setSubmissionStatus('error');
-                reject(error);
-            },
-            async () => {
+    uploadTask.on('state_changed',
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(progress);
+        },
+        (error) => {
+            console.error("Upload failed:", error);
+            toast({ title: "Upload Failed", description: "Could not upload your screenshot. Please try again.", variant: "destructive" });
+            setSubmissionStatus('error');
+        },
+        async () => {
+            try {
                 const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve(downloadURL);
+                setSubmissionStatus('saving');
+                
+                const regDocRef = doc(db, "registrations_2k25", foundRegistration.id);
+                await updateDoc(regDocRef, { 
+                    paymentScreenshotUrl: downloadURL
+                });
+                
+                setSubmissionStatus('success');
+            } catch (error) {
+                console.error("Error updating document: ", error);
+                toast({ title: "Submission Failed", description: "Could not update your payment status. Please try again.", variant: "destructive" });
+                setSubmissionStatus('error');
             }
-        );
-    });
-
-    try {
-        const downloadURL = await uploadPromise;
-        setSubmissionStatus('saving');
-        
-        const regDocRef = doc(db, "registrations_2k25", foundRegistration.id);
-        await updateDoc(regDocRef, { 
-            paymentScreenshotUrl: downloadURL
-        });
-        
-        setSubmissionStatus('success');
-
-    } catch (error) {
-        console.error("Error submitting payment: ", error);
-        if (submissionStatus !== 'error') { // Avoid double toast
-             toast({ title: "Submission Failed", description: "Could not update your payment status. Please try again.", variant: "destructive" });
-             setSubmissionStatus('error');
         }
-    }
+    );
   };
 
 
