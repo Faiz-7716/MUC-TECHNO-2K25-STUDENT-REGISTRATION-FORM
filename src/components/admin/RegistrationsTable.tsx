@@ -178,7 +178,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
   };
   
   const downloadCSV = () => {
-    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Fee Status', 'Fee Amount', 'Registered At'];
+    const headers = ['Name', 'Roll Number', 'Department', 'Year', 'Mobile', 'Event 1', 'Event 2', 'Team Member', 'Fee Status', 'Fee Amount', 'Registered At', 'Payment Screenshot URL'];
     const csvRows = [
       headers.join(','),
       ...filteredData.map(row => [
@@ -192,7 +192,8 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
         `"${row.teamMember2 || 'N/A'}"`,
         `"${row.feePaid ? 'Paid' : 'Unpaid'}"`,
         `"${row.feePaid ? REGISTRATION_FEE : 0}"`,
-        `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"`
+        `"${row.createdAt ? format(row.createdAt.toDate(), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}"`,
+        `"${row.paymentScreenshotUrl || 'N/A'}"`
       ].join(','))
     ];
     
@@ -440,5 +441,3 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     </Card>
   );
 }
-
-    
