@@ -64,8 +64,8 @@ export default function PayOnlineForm() {
         const doc = querySnapshot.docs[0];
         const registrationData = { id: doc.id, ...doc.data() } as Registration;
         setFoundRegistration(registrationData);
-        if (doc.data().feePaid) {
-          setSubmissionStatus('success'); // Already paid
+        if (registrationData.feePaid && registrationData.paymentScreenshotUrl) {
+          setSubmissionStatus('success'); // Already paid and verified
         } else {
           setSubmissionStatus('found');
         }
