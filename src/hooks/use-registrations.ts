@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, writeBatch, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { getDb } from '@/lib/firebase';
 import type { Registration, RegistrationData } from '@/lib/types';
 
 export default function useRegistrations() {
@@ -12,6 +12,7 @@ export default function useRegistrations() {
 
   useEffect(() => {
     setLoading(true);
+    const db = getDb();
     const q = query(collection(db, 'registrations_2k25'), orderBy('createdAt', 'desc'));
 
     const unsubscribe = onSnapshot(
@@ -37,6 +38,7 @@ export default function useRegistrations() {
   
   const addRegistration = useCallback(async (data: RegistrationData) => {
     try {
+      const db = getDb();
       await addDoc(collection(db, "registrations_2k25"), {
         ...data,
         createdAt: serverTimestamp(),
@@ -49,6 +51,7 @@ export default function useRegistrations() {
 
   const deleteRegistration = useCallback(async (id: string) => {
     try {
+      const db = getDb();
       await deleteDoc(doc(db, "registrations_2k25", id));
     } catch (e) {
       console.error("Error deleting document: ", e);
@@ -59,6 +62,7 @@ export default function useRegistrations() {
   const deleteMultipleRegistrations = useCallback(async (ids: string[]) => {
     if (ids.length === 0) return;
     try {
+        const db = getDb();
         const batch = writeBatch(db);
         ids.forEach(id => {
             const docRef = doc(db, "registrations_2k25", id);
@@ -73,6 +77,7 @@ export default function useRegistrations() {
   
   const updateFeeStatus = useCallback(async (id: string, feePaid: boolean) => {
     try {
+      const db = getDb();
       const docRef = doc(db, "registrations_2k25", id);
       await updateDoc(docRef, { feePaid });
     } catch (e) {

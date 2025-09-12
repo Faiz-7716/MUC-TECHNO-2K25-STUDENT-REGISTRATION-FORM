@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { db, storage } from "@/lib/firebase";
+import { getDb, getStorage } from "@/lib/firebase";
 import { REGISTRATION_FEE, type Registration } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,7 @@ export default function PayOnlineForm() {
   async function onVerify(values: z.infer<typeof formSchema>) {
     setSubmissionStatus('verifying');
     setFoundRegistration(null);
+    const db = getDb();
 
     const rollNumber = values.rollNumber.trim().toUpperCase();
     const q = query(collection(db, "registrations_2k25"), where("rollNumber", "==", rollNumber));
@@ -100,6 +101,8 @@ export default function PayOnlineForm() {
     if (!selectedFile || !foundRegistration) return;
 
     setSubmissionStatus('uploading');
+    const storage = getStorage();
+    const db = getDb();
 
     const uploadPromise = new Promise<string>((resolve, reject) => {
         const fileExtension = selectedFile.name.split('.').pop();

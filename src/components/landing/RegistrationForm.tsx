@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { getDb } from "@/lib/firebase";
 import { departments, years, events, teamEvents, EventName, eventTimes } from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
@@ -111,6 +111,7 @@ export default function RegistrationForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
+    const db = getDb();
 
     const registrationData: {
         name: string;

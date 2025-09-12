@@ -1,9 +1,7 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDHCtErGf0e4I4R88AhuKpTN1ojXgmYZyQ",
   authDomain: "studio-7270436993-95279.firebaseapp.com",
@@ -13,9 +11,20 @@ const firebaseConfig = {
   appId: "1:914242989364:web:61812196d3ef60fb894961"
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
-const storage = getStorage(app);
+let app: FirebaseApp;
+let db: Firestore;
+let storage: FirebaseStorage;
 
-export { app, db, storage };
+try {
+    app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    storage = getStorage(app);
+} catch (error) {
+    console.error("Firebase initialization error", error);
+}
+
+
+const getDb = () => db;
+const getStorageInstance = () => storage;
+
+export { app, getDb, getStorageInstance as getStorage };
