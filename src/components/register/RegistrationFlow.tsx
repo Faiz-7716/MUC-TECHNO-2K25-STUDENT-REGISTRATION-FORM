@@ -77,6 +77,10 @@ export default function RegistrationFlow() {
       rollNumber: "",
       mobileNumber: "",
       teamMember2: "",
+      event1: undefined,
+      event2: undefined,
+      department: undefined,
+      year: undefined,
       addEvent2: false,
     },
   });
@@ -308,7 +312,7 @@ export default function RegistrationFlow() {
                 </div>
 
                 {/* STEP 3: REGISTRATION FORM */}
-                <div className={`transition-opacity duration-500 ${isFormDisabled && 'opacity-50 pointer-events-none'}`}>
+                <div>
                      <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Complete Your Registration</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -321,7 +325,7 @@ export default function RegistrationFlow() {
                                             <Input 
                                                 placeholder="Enter your full name" 
                                                 {...field} 
-                                                disabled={submissionStatus !== 'idle'} 
+                                                disabled={submissionStatus === 'upload-success' || submissionStatus === 'saving'} 
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -334,14 +338,14 @@ export default function RegistrationFlow() {
                                             <Input 
                                                 placeholder="Enter your roll number" 
                                                 {...field} 
-                                                disabled={submissionStatus !== 'idle'} 
+                                                disabled={submissionStatus === 'upload-success' || submissionStatus === 'saving'}
                                             />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}/>
                             </div>
-                            <fieldset disabled={isFormDisabled || submissionStatus === 'saving'} className="space-y-6">
+                            <fieldset disabled={isFormDisabled || submissionStatus === 'saving'} className={`space-y-6 transition-opacity duration-500 ${isFormDisabled && 'opacity-50 pointer-events-none'}`}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <FormField name="department" control={form.control} render={({ field }) => (
                                         <FormItem><FormLabel>Department</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Select your department" /></SelectTrigger></FormControl><SelectContent>{departments.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}</SelectContent></Select><FormMessage /></FormItem>
