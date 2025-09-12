@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast";
+import { format } from 'date-fns';
 
 
 interface PaymentsManagerProps {
@@ -123,42 +124,54 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {filteredPayments.map(reg => (
-                            <Card key={reg.id} className="overflow-hidden">
+                            <Card key={reg.id} className="overflow-hidden flex flex-col">
                                 <CardHeader className="p-4">
                                     <CardTitle className="text-base truncate">{reg.name}</CardTitle>
-                                    <CardDescription>{reg.rollNumber}</CardDescription>
+                                    <CardDescription className="flex flex-col">
+                                        <span>{reg.rollNumber}</span>
+                                        <span className="truncate">{reg.department}</span>
+                                    </CardDescription>
                                 </CardHeader>
-                                <CardContent className="p-0 aspect-square relative group">
+                                <CardContent className="p-0 aspect-square relative group flex-grow">
                                      <Dialog>
                                         <DialogTrigger asChild>
                                             <button className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                                 <ZoomIn className="h-10 w-10 text-white"/>
                                             </button>
                                         </DialogTrigger>
-                                        <Image 
-                                            src={reg.paymentScreenshotBase64!}
-                                            alt={`Payment proof for ${reg.name}`}
-                                            fill
-                                            className="object-cover"
-                                        />
+                                        {reg.paymentScreenshotBase64 && (
+                                            <Image 
+                                                src={reg.paymentScreenshotBase64}
+                                                alt={`Payment proof for ${reg.name}`}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        )}
                                         <DialogContent className="max-w-3xl">
                                              <DialogHeader>
                                                 <DialogTitle>Proof for {reg.name} ({reg.rollNumber})</DialogTitle>
                                             </DialogHeader>
                                             <div className="relative h-[80vh]">
-                                                 <Image 
-                                                    src={reg.paymentScreenshotBase64!}
-                                                    alt={`Payment proof for ${reg.name}`}
-                                                    fill
-                                                    className="object-contain"
-                                                />
+                                                 {reg.paymentScreenshotBase64 && (
+                                                    <Image 
+                                                        src={reg.paymentScreenshotBase64}
+                                                        alt={`Payment proof for ${reg.name}`}
+                                                        fill
+                                                        className="object-contain"
+                                                    />
+                                                 )}
                                             </div>
                                         </DialogContent>
                                     </Dialog>
                                 </CardContent>
-                                {!isViewer && (
-                                     <CardFooter className="p-2 bg-muted/50">
-                                        <div className="w-full flex gap-2">
+                                <CardFooter className="p-2 bg-muted/50 flex-col items-start">
+                                    {reg.createdAt && (
+                                        <p className="text-xs text-muted-foreground px-2 pt-1">
+                                            Registered: {format(reg.createdAt.toDate(), 'MMM d, h:mm a')}
+                                        </p>
+                                    )}
+                                    {!isViewer && (
+                                        <div className="w-full flex gap-2 pt-2">
                                             {filter === 'pending' ? (
                                                 <Button size="sm" className="w-full" onClick={() => handleApprove(reg.id)}>
                                                     <Check className="mr-2"/> Approve
@@ -169,8 +182,8 @@ export default function PaymentsManager({ registrations, onUpdateFeeStatus, isVi
                                                 </Button>
                                             )}
                                         </div>
-                                    </CardFooter>
-                                )}
+                                    )}
+                                </CardFooter>
                             </Card>
                         ))}
                     </div>
