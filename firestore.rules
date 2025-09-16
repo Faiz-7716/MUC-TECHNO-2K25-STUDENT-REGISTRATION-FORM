@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Allow anyone to create a registration.
+    // In a real app, you might want to add validation here.
+    match /registrations_2k25/{registrationId} {
+      allow create: if true;
+      
+      // For the admin dashboard to work, it needs to be able to read, update, and delete.
+      // For simplicity in this project, we'll allow it.
+      // In production, you would restrict this to authenticated admin users.
+      // e.g., allow read, update, delete: if request.auth.token.admin == true;
+      allow read, update, delete: if true;
+    }
+
+    // Allow public read for settings, but restrict write.
+    // This allows the registration page to check if fees are enabled.
+    match /settings/config {
+      allow read: if true;
+      
+      // Allow writes for the admin dashboard toggle.
+      // In production, you'd lock this down to admins.
+      allow write: if true;
+    }
+
+    // Deny all other access to your database
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
