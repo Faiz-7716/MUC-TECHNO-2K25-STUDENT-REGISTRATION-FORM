@@ -2,7 +2,7 @@
 
 import { useState, useMemo, ChangeEvent, useTransition, useEffect } from 'react';
 import type { Registration, Department, Year, EventName } from '@/lib/types';
-import { departments, years, events, REGISTRATION_FEE } from '@/lib/types';
+import { departments, years, events, REGISTRATION_FEE, eventTimes } from '@/lib/types';
 import {
   Table,
   TableBody,
@@ -33,12 +33,13 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, FileDown, Search, Trash2, X, Eye } from 'lucide-react';
+import { ArrowUpDown, FileDown, Search, Trash2, X, Eye, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 
 interface RegistrationsTableProps {
@@ -52,6 +53,21 @@ interface RegistrationsTableProps {
 
 type SortKey = keyof Registration | '';
 type SortDirection = 'asc' | 'desc';
+
+const hasTimeConflict = (reg: Registration): boolean => {
+    if (!reg.event1 || !reg.event2) return false;
+
+    const time1 = eventTimes[reg.event1 as EventName];
+    const time2 = eventTimes[reg.event2 as EventName];
+
+    if (time1 && time2) {
+        const t1Start = time1.split('-')[0];
+        const t2Start = time2.split('-')[0];
+        return t1Start === t2Start;
+    }
+    return false;
+}
+
 
 export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple, onUpdateFeeStatus, isViewer, isFeeEnabled }: RegistrationsTableProps) {
   const [isPending, startTransition] = useTransition();
@@ -370,8 +386,10 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                 </TableHeader>
                 <TableBody>
                 {(isPending || filteredData.length > 0) ? (
-                    filteredData.map(reg => (
-                    <TableRow key={reg.id} className={isPending ? 'opacity-50' : ''} data-state={selectedRowIds.includes(reg.id) && "selected"}>
+                    filteredData.map(reg => {
+                     const conflict = hasTimeConflict(reg);
+                     return (
+                    <TableRow key={reg.id} className={cn(isPending ? 'opacity-50' : '', conflict && 'bg-destructive/10 hover:bg-destructive/20 data-[state=selected]:bg-destructive/20')} data-state={selectedRowIds.includes(reg.id) && "selected"}>
                         <TableCell className="px-2">
                           {!isViewer && (
                             <Checkbox
@@ -387,10 +405,11 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                         <TableCell className="px-2 hidden md:table-cell">{reg.year}</TableCell>
                         <TableCell className="px-2">
                           <div className="flex flex-col">
-                            <span>{reg.event1}</span>
-                            {reg.event2 && <span className="text-muted-foreground">{reg.event2}</span>}
+                            <span className={cn(conflict && 'font-semibold')}>{reg.event1}</span>
+                            {reg.event2 && <span className={cn("text-muted-foreground", conflict && 'text-destructive font-semibold')}>{reg.event2}</span>}
                           </div>
                           {reg.teamMember2 && <span className="text-xs text-muted-foreground mt-1">(with {reg.teamMember2})</span>}
+                          {conflict && <div className="text-destructive font-bold text-xs flex items-center gap-1 mt-1"><AlertTriangle className="h-3 w-3"/>Time Conflict</div>}
                         </TableCell>
                         {isFeeEnabled && (
                             <TableCell className="px-2">
@@ -439,7 +458,8 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                             )}
                         </TableCell>
                     </TableRow>
-                    ))
+                     )
+                    })
                 ) : (
                     <TableRow>
                     <TableCell colSpan={tableHeaders.length + 1} className="h-24 text-center">
