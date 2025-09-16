@@ -30,6 +30,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Loader2, QrCode, FileUp, CheckCircle, PartyPopper, FileWarning, Send } from "lucide-react";
 import Image from "next/image";
 import { Checkbox } from "../ui/checkbox";
+import useSettings from "@/hooks/use-settings";
+import { Skeleton } from "../ui/skeleton";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -73,6 +75,7 @@ export default function RegistrationFlow() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { settings, loading: settingsLoading } = useSettings();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -118,7 +121,7 @@ export default function RegistrationFlow() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!selectedFile) {
+    if (settings?.isFeeEnabled && !selectedFile) {
         toast({
             title: "Screenshot Required",
             description: "Please select your payment screenshot before submitting.",
@@ -145,15 +148,17 @@ export default function RegistrationFlow() {
             return;
         }
         
-        const base64String = await fileToBase64(selectedFile);
-        
-        const registrationData = {
+        const registrationData: any = {
             ...values,
             rollNumber: rollNumberUpper,
-            paymentScreenshotBase64: base64String,
-            feePaid: false, 
+            feePaid: !settings?.isFeeEnabled,
             createdAt: serverTimestamp(),
         };
+
+        if (settings?.isFeeEnabled && selectedFile) {
+            const base64String = await fileToBase64(selectedFile);
+            registrationData.paymentScreenshotBase64 = base64String;
+        }
 
         await addDoc(collection(db, "registrations_2k25"), registrationData);
         setSubmissionStatus('success');
@@ -179,7 +184,8 @@ export default function RegistrationFlow() {
             <CheckCircle className="h-24 w-24 text-green-500 mx-auto animate-pulse" />
             <h2 className="font-headline text-3xl sm:text-4xl font-bold text-primary mt-6">Registration Submitted!</h2>
             <CardDescription className="mt-2 text-base sm:text-lg max-w-sm mx-auto">
-                Thank you! Your registration and payment proof have been submitted for verification. We look forward to seeing you!
+                Thank you! Your registration has been submitted.
+                 {settings?.isFeeEnabled && " It is now pending payment verification."} We look forward to seeing you!
             </CardDescription>
             <Button onClick={handleReset} className="mt-8">
               <PartyPopper className="mr-2 h-4 w-4"/>
@@ -191,6 +197,11 @@ export default function RegistrationFlow() {
   }
 
   const isSubmitting = submissionStatus === 'submitting';
+  const isFeeEnabled = settings?.isFeeEnabled;
+
+  const showPaymentSection = !settingsLoading && isFeeEnabled;
+  const allowSubmit = isFeeEnabled ? !!selectedFile : true;
+
 
   return (
     <section id="register">
@@ -201,53 +212,63 @@ export default function RegistrationFlow() {
             </CardHeader>
             <CardContent className="space-y-8">
                 
-                <div className="p-4 sm:p-6 border rounded-lg space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <h3 className="font-headline text-xl font-bold flex items-center gap-2"><QrCode /> Step 1: Scan & Pay</h3>
-                            <p className="text-muted-foreground text-sm sm:text-base">Scan the QR code with any UPI app to pay the registration fee of <span className="font-bold text-foreground">₹{REGISTRATION_FEE}</span>.</p>
-                            <Image 
-                                src="/docs/payment-qr.jpg" 
-                                alt="Payment QR Code"
-                                width={250}
-                                height={250}
-                                className="rounded-lg border-4 border-primary shadow-lg mx-auto w-48 h-48 sm:w-64 sm:h-64 object-cover"
-                            />
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="font-headline text-xl font-bold flex items-center gap-2"><FileUp /> Step 2: Select Screenshot</h3>
-                             <p className="text-muted-foreground text-sm sm:text-base">After payment, take a screenshot and select it here. You will submit everything together at the end.</p>
-                            
-                            <div className="space-y-2">
-                                 <Input 
-                                    type="file" 
-                                    accept={ALLOWED_FILE_TYPES.join(',')}
-                                    disabled={isSubmitting}
-                                    onChange={handleFileChange}
-                                    className="file:text-foreground h-auto p-2"
+                {settingsLoading && (
+                    <div className="space-y-4 p-6 border rounded-lg">
+                        <Skeleton className="h-8 w-1/3" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-64 w-full" />
+                    </div>
+                )}
+                
+                {showPaymentSection && (
+                    <div className="p-4 sm:p-6 border rounded-lg space-y-8 animate-in fade-in">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-4">
+                                <h3 className="font-headline text-xl font-bold flex items-center gap-2"><QrCode /> Step 1: Scan & Pay</h3>
+                                <p className="text-muted-foreground text-sm sm:text-base">Scan the QR code with any UPI app to pay the registration fee of <span className="font-bold text-foreground">₹{REGISTRATION_FEE}</span>.</p>
+                                <Image 
+                                    src="/docs/payment-qr.jpg" 
+                                    alt="Payment QR Code"
+                                    width={250}
+                                    height={250}
+                                    className="rounded-lg border-4 border-primary shadow-lg mx-auto w-48 h-48 sm:w-64 sm:h-64 object-cover"
                                 />
-                                <p className="text-xs text-muted-foreground">Please ensure the screenshot file is less than 1MB.</p>
-                                {fileError && <p className="text-sm font-medium text-destructive flex items-center gap-2 mt-2"><FileWarning className="h-4 w-4" /> {fileError}</p>}
                             </div>
-                            
-                            {selectedFile && !isSubmitting && (
-                                <div className="flex items-center gap-3 p-3 rounded-md bg-green-50 border border-green-200 text-green-700">
-                                    <CheckCircle className="h-6 w-6" />
-                                    <div className="flex flex-col">
-                                        <span className="font-bold truncate max-w-xs text-sm sm:text-base">Selected: {selectedFile.name}</span>
-                                        <span className="text-sm">Ready to be submitted with your form.</span>
-                                    </div>
+                            <div className="space-y-4">
+                                <h3 className="font-headline text-xl font-bold flex items-center gap-2"><FileUp /> Step 2: Select Screenshot</h3>
+                                <p className="text-muted-foreground text-sm sm:text-base">After payment, take a screenshot and select it here. You will submit everything together at the end.</p>
+                                
+                                <div className="space-y-2">
+                                    <Input 
+                                        type="file" 
+                                        accept={ALLOWED_FILE_TYPES.join(',')}
+                                        disabled={isSubmitting}
+                                        onChange={handleFileChange}
+                                        className="file:text-foreground h-auto p-2"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Please ensure the screenshot file is less than 1MB.</p>
+                                    {fileError && <p className="text-sm font-medium text-destructive flex items-center gap-2 mt-2"><FileWarning className="h-4 w-4" /> {fileError}</p>}
                                 </div>
-                            )}
+                                
+                                {selectedFile && !isSubmitting && (
+                                    <div className="flex items-center gap-3 p-3 rounded-md bg-green-50 border border-green-200 text-green-700">
+                                        <CheckCircle className="h-6 w-6" />
+                                        <div className="flex flex-col">
+                                            <span className="font-bold truncate max-w-xs text-sm sm:text-base">Selected: {selectedFile.name}</span>
+                                            <span className="text-sm">Ready to be submitted with your form.</span>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 <div>
-                     <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> Step 3: Fill Details & Submit</h3>
+                     <h3 className="font-headline text-xl font-bold flex items-center gap-2 mb-4"><Send /> {showPaymentSection ? 'Step 3' : 'Step 1'}: Fill Details & Submit</h3>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <fieldset disabled={isSubmitting || !selectedFile} className={`space-y-6 transition-opacity duration-300 ${!selectedFile ? 'opacity-50 pointer-events-none' : ''}`}>
+                            <fieldset disabled={isSubmitting || settingsLoading || (isFeeEnabled && !selectedFile)} className={`space-y-6 transition-opacity duration-300 ${!allowSubmit && !settingsLoading ? 'opacity-50 pointer-events-none' : ''}`}>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     <FormField name="name" control={form.control} render={({ field }) => (
                                         <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Enter your full name" {...field} /></FormControl><FormMessage /></FormItem>
@@ -283,11 +304,11 @@ export default function RegistrationFlow() {
                                 </div>
                             </fieldset>
                             
-                             <Button type="submit" disabled={isSubmitting || !selectedFile} className="w-full sm:w-auto">
-                                {isSubmitting ? (
+                             <Button type="submit" disabled={isSubmitting || settingsLoading || !allowSubmit} className="w-full sm:w-auto">
+                                {isSubmitting || settingsLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Submitting...
+                                        {isSubmitting ? 'Submitting...' : 'Loading...'}
                                     </>
                                 ) : (
                                     <>

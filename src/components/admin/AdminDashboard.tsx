@@ -12,6 +12,10 @@ import PaymentsManager from "./PaymentsManager";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { List, GalleryVerticalEnd } from "lucide-react";
+import useSettings from "@/hooks/use-settings";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminDashboardProps {
   accessLevel: AccessLevel;
@@ -30,11 +34,31 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
     updateFeeStatus
   } = useRegistrations();
   
+  const { settings, updateSettings, loading: settingsLoading } = useSettings();
+  const { toast } = useToast();
+  
   const [viewMode, setViewMode] = useState<ViewMode>("table");
 
   const isViewer = accessLevel === 'viewer';
   
   const paymentsToReview = registrations.filter(r => r.paymentScreenshotBase64 && !r.feePaid);
+
+  const handleFeeToggle = async (isFeeEnabled: boolean) => {
+    if (isViewer || settingsLoading) return;
+    try {
+      await updateSettings({ isFeeEnabled });
+      toast({
+        title: "Setting Updated",
+        description: `Registration fee has been ${isFeeEnabled ? 'enabled' : 'disabled'}.`,
+      });
+    } catch (err) {
+      toast({
+        title: "Update Failed",
+        description: "Could not update the fee setting.",
+        variant: "destructive",
+      });
+    }
+  }
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -46,6 +70,18 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+            {!isViewer && (
+              <div className="flex items-center space-x-2 border rounded-md p-2 bg-background">
+                <Label htmlFor="fee-toggle" className="text-sm font-medium">Fee Active</Label>
+                <Switch 
+                  id="fee-toggle" 
+                  checked={settings?.isFeeEnabled}
+                  onCheckedChange={handleFeeToggle}
+                  disabled={settingsLoading || isViewer}
+                  aria-label="Toggle registration fee"
+                />
+              </div>
+            )}
             {!isViewer && <AddRegistration onAdd={addRegistration} />}
              <Button 
               variant={viewMode === 'table' ? 'default' : 'outline'} 
@@ -61,9 +97,10 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
                 className="relative"
                 title="View Payments Manager"
                 size="icon"
+                disabled={!settings?.isFeeEnabled}
              >
                 <GalleryVerticalEnd className="h-5 w-5" />
-                {paymentsToReview.length > 0 && (
+                {paymentsToReview.length > 0 && settings?.isFeeEnabled && (
                   <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-xs text-white">
                     {paymentsToReview.length}
                   </span>
@@ -85,10 +122,10 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
           <>
             {viewMode === 'table' ? (
                 <>
-                    <StatCards registrations={registrations} />
+                    <StatCards registrations={registrations} isFeeEnabled={settings?.isFeeEnabled ?? true} />
                     <div className="grid gap-8 grid-cols-1 lg:grid-cols-3">
                       <LiveEventStats registrations={registrations} className="lg:col-span-1" />
-                      <FeeCollectionStats registrations={registrations} className="lg:col-span-2"/>
+                      {settings?.isFeeEnabled && <FeeCollectionStats registrations={registrations} className="lg:col-span-2"/>}
                     </div>
                     <RegistrationsTable 
                       initialData={registrations}
@@ -96,6 +133,7 @@ export default function AdminDashboard({ accessLevel }: AdminDashboardProps) {
                       onDeleteMultiple={deleteMultipleRegistrations}
                       onUpdateFeeStatus={updateFeeStatus}
                       isViewer={isViewer}
+                      isFeeEnabled={settings?.isFeeEnabled ?? true}
                     />
                 </>
             ) : (

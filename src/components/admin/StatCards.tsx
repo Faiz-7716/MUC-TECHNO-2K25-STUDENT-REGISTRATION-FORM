@@ -6,10 +6,11 @@ import type { Registration, EventName } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Users, ListChecks, School, CalendarDays } from 'lucide-react';
-import { departments, years, events } from '@/lib/types';
+import { departments, years, events, REGISTRATION_FEE } from '@/lib/types';
 
 interface StatCardsProps {
   registrations: Registration[];
+  isFeeEnabled: boolean;
 }
 
 const processData = (registrations: Registration[], categories: readonly string[], key: keyof Registration | 'event') => {
@@ -68,7 +69,7 @@ const SimpleBarChart = ({ data, title }: { data: { name: string, total: number }
   </Card>
 );
 
-export default function StatCards({ registrations }: StatCardsProps) {
+export default function StatCards({ registrations, isFeeEnabled }: StatCardsProps) {
   const totalRegistrations = registrations.length;
   
   const totalEventSlots = registrations.reduce((acc, reg) => {
@@ -77,6 +78,8 @@ export default function StatCards({ registrations }: StatCardsProps) {
     if (reg.event2) count++;
     return acc + count;
   }, 0);
+
+  const totalCollected = registrations.filter(r => r.feePaid).length * REGISTRATION_FEE;
 
 
   const registrationsByEvent = useMemo(() => processData(registrations, events, 'event'), [registrations]);
@@ -95,8 +98,20 @@ export default function StatCards({ registrations }: StatCardsProps) {
           <p className="text-xs text-muted-foreground">{totalEventSlots} event slots filled</p>
         </CardContent>
       </Card>
+      {isFeeEnabled && (
+         <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+            <div className="text-4xl font-bold">₹{totalCollected.toLocaleString('en-IN')}</div>
+            <p className="text-xs text-muted-foreground">from {registrations.filter(r => r.feePaid).length} paid registrations</p>
+            </CardContent>
+        </Card>
+      )}
       
-      <div className="lg:col-span-3 grid gap-4 grid-cols-1 sm:grid-cols-3">
+      <div className={cn("grid gap-4 grid-cols-1", isFeeEnabled ? "sm:grid-cols-2 lg:col-span-2" : "sm:grid-cols-3 lg:col-span-3")}>
         <SimpleBarChart data={registrationsByEvent} title="By Event" />
         <SimpleBarChart data={registrationsByDept} title="By Department" />
         <SimpleBarChart data={registrationsByYear} title="By Year" />

@@ -47,12 +47,13 @@ interface RegistrationsTableProps {
   onDeleteMultiple: (ids: string[]) => Promise<void>;
   onUpdateFeeStatus: (id: string, feePaid: boolean) => Promise<void>;
   isViewer: boolean;
+  isFeeEnabled: boolean;
 }
 
 type SortKey = keyof Registration | '';
 type SortDirection = 'asc' | 'desc';
 
-export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple, onUpdateFeeStatus, isViewer }: RegistrationsTableProps) {
+export default function RegistrationsTable({ initialData, onDelete, onDeleteMultiple, onUpdateFeeStatus, isViewer, isFeeEnabled }: RegistrationsTableProps) {
   const [isPending, startTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -107,11 +108,15 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
       const departmentMatch = filters.department === 'all' || reg.department === filters.department;
       const yearMatch = filters.year === 'all' || reg.year === filters.year;
       const eventMatch = filters.event === 'all' || reg.event1 === filters.event || reg.event2 === filters.event;
-      const feePaidMatch = filters.feePaid === 'all' || String(reg.feePaid) === filters.feePaid;
+      
+      let feePaidMatch = true;
+      if (isFeeEnabled) {
+          feePaidMatch = filters.feePaid === 'all' || String(reg.feePaid) === filters.feePaid;
+      }
 
       return searchMatch && departmentMatch && yearMatch && eventMatch && feePaidMatch;
     });
-  }, [initialData, searchTerm, filters, sorting]);
+  }, [initialData, searchTerm, filters, sorting, isFeeEnabled]);
   
   useEffect(() => {
     setSelectedRowIds([]);
@@ -228,16 +233,22 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     }
   };
 
-  const tableHeaders: { key: SortKey; label: string, hideSort?: boolean }[] = [
+  let tableHeaders: { key: SortKey; label: string, hideSort?: boolean }[] = [
     { key: 'name', label: 'Name' },
     { key: 'rollNumber', label: 'Roll No' },
     { key: 'department', label: 'Department' },
     { key: 'year', label: 'Year' },
     { key: 'event1', label: 'Events' },
-    { key: 'feePaid', label: 'Fee Status' },
-    { key: 'createdAt', label: 'Registered' },
-    { key: '', label: 'Actions', hideSort: true },
   ];
+
+  if (isFeeEnabled) {
+    tableHeaders.push({ key: 'feePaid', label: 'Fee Status' });
+  }
+
+  tableHeaders.push(
+    { key: 'createdAt', label: 'Registered' },
+    { key: '', label: 'Actions', hideSort: true }
+  );
 
   const isAllSelected = selectedRowIds.length > 0 && selectedRowIds.length === filteredData.length;
   const isSomeSelected = selectedRowIds.length > 0 && selectedRowIds.length < filteredData.length;
@@ -315,14 +326,16 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                 {events.map(e => <SelectItem key={e} value={e}>{e}</SelectItem>)}
               </SelectContent>
             </Select>
-             <Select value={filters.feePaid} onValueChange={(v) => handleFilterChange('feePaid', v)}>
-              <SelectTrigger><SelectValue placeholder="Fee Status" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="true">Paid</SelectItem>
-                <SelectItem value="false">Unpaid</SelectItem>
-              </SelectContent>
-            </Select>
+            {isFeeEnabled && (
+                 <Select value={filters.feePaid} onValueChange={(v) => handleFilterChange('feePaid', v)}>
+                    <SelectTrigger><SelectValue placeholder="Fee Status" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="true">Paid</SelectItem>
+                        <SelectItem value="false">Unpaid</SelectItem>
+                    </SelectContent>
+                </Select>
+            )}
           </div>
         </div>
 
@@ -379,26 +392,28 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                           </div>
                           {reg.teamMember2 && <span className="text-xs text-muted-foreground mt-1">(with {reg.teamMember2})</span>}
                         </TableCell>
-                        <TableCell className="px-2">
-                            <div className="flex items-center gap-2">
-                                {isViewer ? (
-                                    <Badge variant={reg.feePaid ? 'default' : 'destructive'} className="pointer-events-none">
-                                        {reg.feePaid ? 'Paid' : 'Unpaid'}
-                                    </Badge>
-                                ) : (
-                                    <Switch
-                                        checked={reg.feePaid}
-                                        onCheckedChange={(newStatus) => handleFeeStatusChange(reg.id, newStatus)}
-                                        aria-label="Fee payment status"
-                                    />
-                                )}
-                                {reg.paymentScreenshotBase64 && (
-                                   <div className="text-muted-foreground" title="Payment proof available">
-                                        <Eye className="h-4 w-4"/>
-                                   </div>
-                                )}
-                            </div>
-                        </TableCell>
+                        {isFeeEnabled && (
+                            <TableCell className="px-2">
+                                <div className="flex items-center gap-2">
+                                    {isViewer ? (
+                                        <Badge variant={reg.feePaid ? 'default' : 'destructive'} className="pointer-events-none">
+                                            {reg.feePaid ? 'Paid' : 'Unpaid'}
+                                        </Badge>
+                                    ) : (
+                                        <Switch
+                                            checked={reg.feePaid}
+                                            onCheckedChange={(newStatus) => handleFeeStatusChange(reg.id, newStatus)}
+                                            aria-label="Fee payment status"
+                                        />
+                                    )}
+                                    {reg.paymentScreenshotBase64 && (
+                                    <div className="text-muted-foreground" title="Payment proof available">
+                                            <Eye className="h-4 w-4"/>
+                                    </div>
+                                    )}
+                                </div>
+                            </TableCell>
+                        )}
                         <TableCell className="px-2 hidden lg:table-cell">{reg.createdAt ? format(reg.createdAt.toDate(), 'MMM d, h:mm a') : 'N/A'}</TableCell>
                         <TableCell className="px-2">
                             {!isViewer && (
