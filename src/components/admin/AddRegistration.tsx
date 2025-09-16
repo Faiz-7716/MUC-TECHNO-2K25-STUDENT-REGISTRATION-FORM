@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -94,15 +95,23 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
     },
   });
 
-  const selectedEvent1 = form.watch("event1");
-  const addEvent2 = form.watch("addEvent2");
-  const selectedDepartment = form.watch("department");
+  const { watch, setValue, resetField } = form;
+  const selectedEvent1 = watch("event1");
+  const addEvent2 = watch("addEvent2");
+  const selectedDepartment = watch("department");
   
   useEffect(() => {
     if (selectedDepartment === "B.Sc. Maths") {
-      form.setValue("year", "3rd Year");
+      setValue("year", "3rd Year");
     }
-  }, [selectedDepartment, form]);
+  }, [selectedDepartment, setValue]);
+
+  useEffect(() => {
+    if (!addEvent2) {
+      resetField("event2");
+    }
+  }, [addEvent2, resetField]);
+
 
   const availableYears = selectedDepartment === "B.Sc. Maths" ? ["3rd Year"] as const : years;
 

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -88,7 +89,7 @@ export default function RegistrationFlow() {
     },
   });
 
-  const { watch, setValue } = form;
+  const { watch, setValue, resetField } = form;
   const selectedEvent1 = watch("event1");
   const addEvent2 = watch("addEvent2");
   const selectedDepartment = watch("department");
@@ -99,6 +100,13 @@ export default function RegistrationFlow() {
       setValue("year", "3rd Year");
     }
   }, [selectedDepartment, setValue]);
+
+  useEffect(() => {
+    if (!addEvent2) {
+      resetField("event2");
+    }
+  }, [addEvent2, resetField]);
+
 
   const availableYears = selectedDepartment === "B.Sc. Maths" ? ["3rd Year"] as const : years;
 
