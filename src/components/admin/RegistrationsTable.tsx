@@ -251,23 +251,28 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     }
   };
 
-  let tableHeaders: { key: SortKey; label: string, hideSort?: boolean }[] = [
-    { key: 'name', label: 'Name' },
-    { key: 'rollNumber', label: 'Roll No' },
-    { key: 'department', label: 'Department' },
-    { key: 'mobileNumber', label: 'Mobile' },
-    { key: 'year', label: 'Year' },
-    { key: 'event1', label: 'Events' },
-  ];
-
-  if (isFeeEnabled) {
-    tableHeaders.push({ key: 'feePaid', label: 'Fee Status' });
-  }
-
-  tableHeaders.push(
-    { key: 'createdAt', label: 'Registered' },
-    { key: '', label: 'Actions', hideSort: true }
-  );
+  const tableHeaders: { key: SortKey; label: string, hideSort?: boolean }[] = useMemo(() => {
+    const headers: { key: SortKey; label: string, hideSort?: boolean }[] = [
+      { key: 'name', label: 'Name' },
+      { key: 'rollNumber', label: 'Roll No' },
+      { key: 'department', label: 'Department' },
+    ];
+    if (!isViewer) {
+        headers.push({ key: 'mobileNumber', label: 'Mobile' });
+    }
+    headers.push(
+        { key: 'year', label: 'Year' },
+        { key: 'event1', label: 'Events' }
+    );
+    if (isFeeEnabled) {
+        headers.push({ key: 'feePaid', label: 'Fee Status' });
+    }
+    headers.push(
+        { key: 'createdAt', label: 'Registered' },
+        { key: '', label: 'Actions', hideSort: true }
+    );
+    return headers;
+  }, [isViewer, isFeeEnabled]);
 
   const isAllSelected = selectedRowIds.length > 0 && selectedRowIds.length === filteredData.length;
   const isSomeSelected = selectedRowIds.length > 0 && selectedRowIds.length < filteredData.length;
@@ -405,7 +410,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                         <TableCell className="font-medium px-4">{reg.name}</TableCell>
                         <TableCell className="px-2">{reg.rollNumber}</TableCell>
                         <TableCell className="px-2 hidden sm:table-cell">{reg.department}</TableCell>
-                        <TableCell className="px-2 hidden md:table-cell">{reg.mobileNumber}</TableCell>
+                        {!isViewer && <TableCell className="px-2 hidden md:table-cell">{reg.mobileNumber}</TableCell>}
                         <TableCell className="px-2 hidden md:table-cell">{reg.year}</TableCell>
                         <TableCell className="px-2">
                           <div className="flex flex-col">
