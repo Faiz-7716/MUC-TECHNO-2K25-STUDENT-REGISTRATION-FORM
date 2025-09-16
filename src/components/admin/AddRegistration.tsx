@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -147,26 +148,19 @@ export default function AddRegistration({ onAdd }: AddRegistrationProps) {
         return;
     }
 
-    const registrationData: RegistrationData = {
-        name: values.name,
-        rollNumber: rollNumberUpper,
-        department: values.department,
-        year: values.year,
-        mobileNumber: values.mobileNumber,
-        event1: values.event1,
-        feePaid: values.feePaid || false,
-    };
+    const registrationData: Partial<RegistrationData> & { [key: string]: any } = { ...values };
+    registrationData.rollNumber = rollNumberUpper;
 
-    if (values.addEvent2 && values.event2) {
-        registrationData.event2 = values.event2;
+    if (!registrationData.addEvent2 || !registrationData.event2) {
+        delete registrationData.event2;
     }
-
-    if (showTeamMemberField && values.teamMember2) {
-        registrationData.teamMember2 = values.teamMember2;
+    
+    if (!showTeamMemberField || !values.teamMember2) {
+        delete registrationData.teamMember2;
     }
 
     try {
-      await onAdd(registrationData);
+      await onAdd(registrationData as RegistrationData);
       
       toast({
         title: "Registration Added!",

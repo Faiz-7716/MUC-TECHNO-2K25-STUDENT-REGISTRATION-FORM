@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -156,12 +157,20 @@ export default function RegistrationFlow() {
             return;
         }
         
-        const registrationData: any = {
+        const registrationData: { [key: string]: any } = {
             ...values,
             rollNumber: rollNumberUpper,
             feePaid: !settings?.isFeeEnabled,
             createdAt: serverTimestamp(),
         };
+
+        if (!registrationData.addEvent2 || !registrationData.event2) {
+            delete registrationData.event2;
+        }
+         if (!showTeamMemberField || !values.teamMember2) {
+            delete registrationData.teamMember2;
+        }
+
 
         if (settings?.isFeeEnabled && selectedFile) {
             const base64String = await fileToBase64(selectedFile);
