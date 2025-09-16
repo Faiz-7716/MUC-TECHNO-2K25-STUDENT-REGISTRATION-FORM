@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Users, ListChecks, School, CalendarDays } from 'lucide-react';
 import { departments, years, events, REGISTRATION_FEE } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 interface StatCardsProps {
   registrations: Registration[];
