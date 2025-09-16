@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowUpDown, FileDown, Search, Trash2, X, Eye, AlertTriangle } from 'lucide-react';
+import { ArrowUpDown, FileDown, Search, Trash2, X, Eye, AlertTriangle, Phone } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Switch } from '@/components/ui/switch';
@@ -120,7 +120,9 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
       const searchLower = searchTerm.toLowerCase();
       const searchMatch =
         reg.name.toLowerCase().includes(searchLower) ||
-        reg.rollNumber.toLowerCase().includes(searchLower);
+        reg.rollNumber.toLowerCase().includes(searchLower) ||
+        reg.mobileNumber.includes(searchLower);
+
       const departmentMatch = filters.department === 'all' || reg.department === filters.department;
       const yearMatch = filters.year === 'all' || reg.year === filters.year;
       const eventMatch = filters.event === 'all' || reg.event1 === filters.event || reg.event2 === filters.event;
@@ -253,6 +255,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
     { key: 'name', label: 'Name' },
     { key: 'rollNumber', label: 'Roll No' },
     { key: 'department', label: 'Department' },
+    { key: 'mobileNumber', label: 'Mobile' },
     { key: 'year', label: 'Year' },
     { key: 'event1', label: 'Events' },
   ];
@@ -314,7 +317,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
           <div className="relative w-full md:flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or roll no..."
+              placeholder="Search by name, roll no, mobile..."
               defaultValue={searchTerm}
               onChange={handleSearchChange}
               className="pl-10"
@@ -402,6 +405,7 @@ export default function RegistrationsTable({ initialData, onDelete, onDeleteMult
                         <TableCell className="font-medium px-4">{reg.name}</TableCell>
                         <TableCell className="px-2">{reg.rollNumber}</TableCell>
                         <TableCell className="px-2 hidden sm:table-cell">{reg.department}</TableCell>
+                        <TableCell className="px-2 hidden md:table-cell">{reg.mobileNumber}</TableCell>
                         <TableCell className="px-2 hidden md:table-cell">{reg.year}</TableCell>
                         <TableCell className="px-2">
                           <div className="flex flex-col">
