@@ -18,7 +18,7 @@ interface LoginModalProps {
   onLoginSuccess: (accessLevel: AccessLevel) => void;
 }
 
-const ADMIN_PASSWORD = "muc-admin-25";
+const ADMIN_PASSWORD = "techno";
 const VIEWER_PASSWORD = "admin";
 
 export default function LoginModal({ onLoginSuccess }: LoginModalProps) {
