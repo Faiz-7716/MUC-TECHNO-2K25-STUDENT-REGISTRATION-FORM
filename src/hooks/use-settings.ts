@@ -26,10 +26,13 @@ export default function useSettings() {
         if (docSnap.exists()) {
           setSettings(docSnap.data() as AppSettings);
         } else {
-          // If no settings doc exists, create it with default values
-          const defaultSettings: AppSettings = { isFeeEnabled: true };
+          // If no settings doc exists, create it with a default value of false.
+          const defaultSettings: AppSettings = { isFeeEnabled: false };
           setDoc(docRef, defaultSettings)
-            .then(() => setSettings(defaultSettings))
+            .then(() => {
+                setSettings(defaultSettings);
+                console.log("Default settings created and applied.");
+            })
             .catch(err => {
                  console.error("Error creating default settings: ", err);
                  setError('Failed to initialize settings.');

@@ -233,7 +233,10 @@ export default function RegistrationFlow() {
                     <div className="space-y-4 p-6 border rounded-lg">
                         <Skeleton className="h-8 w-1/3" />
                         <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-64 w-full" />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                            <Skeleton className="h-64 w-full" />
+                            <Skeleton className="h-64 w-full" />
+                        </div>
                     </div>
                 )}
                 
